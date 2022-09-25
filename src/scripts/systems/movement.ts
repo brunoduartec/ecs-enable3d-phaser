@@ -48,8 +48,8 @@ export default function createMovementSystem() {
           break;
       }
 
-      Position.x[id] += Velocity.x[id];
-      Position.y[id] += Velocity.z[id];
+      //   Position.x[id] += Velocity.x[id];
+      //   Position.y[id] += Velocity.z[id];
     }
 
     return world;

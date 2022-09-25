@@ -5,16 +5,18 @@ import Velocity from "../components/Velocity";
 import Rotation from "../components/Rotation";
 import Player from "../components/Player";
 import Input, { Direction } from "../components/Input";
+import Jump from "../components/Jump";
 
 interface keysProps {
   up: Phaser.Input.Keyboard.Key;
   down: Phaser.Input.Keyboard.Key;
   left: Phaser.Input.Keyboard.Key;
   right: Phaser.Input.Keyboard.Key;
+  jump: Phaser.Input.Keyboard.Key;
 }
 
 export default function createPlayerSystem(keys: keysProps) {
-  const playerQuery = defineQuery([Player, Velocity, Rotation, Input]);
+  const playerQuery = defineQuery([Player, Velocity, Rotation, Input, Jump]);
 
   return defineSystem((world) => {
     const entities = playerQuery(world);
@@ -31,6 +33,12 @@ export default function createPlayerSystem(keys: keysProps) {
         Input.direction[id] = Direction.Down;
       } else {
         Input.direction[id] = Direction.None;
+      }
+
+      if (keys.jump.isDown) {
+        Jump.isJumping[id] = 1;
+      } else {
+        Jump.isJumping[id] = 0;
       }
     }
 
