@@ -1,9 +1,13 @@
 import { defineSystem, defineQuery } from "bitecs";
 
-import Position from "../components/Position";
-import Velocity from "../components/Velocity";
-import Rotation from "../components/Rotation";
-import Input, { Direction } from "../components/Input";
+import { ComponentFactory } from "../components/ComponentFactory";
+
+const Position = ComponentFactory.getInstance().getProduct("Position");
+const Rotation = ComponentFactory.getInstance().getProduct("Rotation");
+const Velocity = ComponentFactory.getInstance().getProduct("Velocity");
+const Input = ComponentFactory.getInstance().getProduct("Input");
+
+import { Direction } from "../components/Input";
 
 export default function createMovementSystem() {
   const movementQuery = defineQuery([Position, Velocity, Input, Rotation]);
@@ -19,32 +23,34 @@ export default function createMovementSystem() {
 
       switch (direction) {
         case Direction.None:
-          Velocity.x[id] = 0;
-          Velocity.z[id] = 0;
+          Velocity.speed[id] = 0;
+          Rotation.x[id] = 0;
           break;
 
         case Direction.Left:
-          Velocity.x[id] = -speed;
-          Velocity.z[id] = 0;
-          Rotation.angle[id] = 180;
+          // Velocity.x[id] = speed;
+          // Velocity.z[id] = 0;
+          Rotation.x[id] += Rotation.speed[id];
           break;
 
         case Direction.Right:
-          Velocity.x[id] = speed;
-          Velocity.z[id] = 0;
-          Rotation.angle[id] = 0;
+          // Velocity.x[id] = speed;
+          // Velocity.z[id] = 0;
+          // Rotation.angle[id] = 0;
+          Rotation.x[id] -= Rotation.speed[id];
           break;
 
         case Direction.Up:
-          Velocity.x[id] = 0;
-          Velocity.z[id] = -speed;
-          Rotation.angle[id] = 270;
+          Velocity.speed[id] = speed;
+          // Velocity.z[id] = speed;
+          // Rotation.angle[id] = 270;
+          Rotation.x[id] = 0;
           break;
 
         case Direction.Down:
-          Velocity.x[id] = 0;
-          Velocity.z[id] = speed;
-          Rotation.angle[id] = 90;
+          Velocity.speed[id] = speed;
+          // Velocity.z[id] = speed;
+          Rotation.x[id] += 180;
           break;
       }
 

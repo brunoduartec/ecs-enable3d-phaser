@@ -12,6 +12,9 @@ const PlayerComponent = ComponentFactory.getInstance().getProduct("Player");
 const InputComponent = ComponentFactory.getInstance().getProduct("Input");
 const ModelComponent = ComponentFactory.getInstance().getProduct("Model");
 const HealthComponent = ComponentFactory.getInstance().getProduct("Health");
+const AvoidDropComponent =
+  ComponentFactory.getInstance().getProduct("AvoidDrop");
+const ViewComponent = ComponentFactory.getInstance().getProduct("View");
 
 import { ModelTypes } from "../components/Model";
 
@@ -29,6 +32,8 @@ class Player implements IEntity {
     addComponent(world, InputComponent, player);
     addComponent(world, JumpComponent, player);
     addComponent(world, HealthComponent, player);
+    addComponent(world, AvoidDropComponent, player);
+    addComponent(world, ViewComponent, player);
 
     PositionComponent.x[player] = 1;
     PositionComponent.y[player] = 10;
@@ -44,6 +49,13 @@ class Player implements IEntity {
     JumpComponent.isGrounded[player] = 0;
 
     HealthComponent.amount[player] = 100;
+
+    AvoidDropComponent.height[player] = 10;
+
+    RotationComponent.speed[player] = 1;
+
+    ViewComponent.length[player] = 10;
+    ViewComponent.fov[player] = 3;
   }
 }
 

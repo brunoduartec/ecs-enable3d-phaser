@@ -10,6 +10,10 @@ const NPCComponent = ComponentFactory.getInstance().getProduct("NPC");
 const InputComponent = ComponentFactory.getInstance().getProduct("Input");
 const ModelComponent = ComponentFactory.getInstance().getProduct("Model");
 const HealthComponent = ComponentFactory.getInstance().getProduct("Health");
+const AvoidDropComponent =
+  ComponentFactory.getInstance().getProduct("AvoidDrop");
+
+const ViewComponent = ComponentFactory.getInstance().getProduct("View");
 
 import { ModelTypes } from "../components/Model";
 
@@ -35,6 +39,7 @@ class NPC implements IEntity {
 
     addComponent(world, VelocityComponent, npc);
     addComponent(world, RotationComponent, npc);
+    RotationComponent.speed[npc] = 0.3;
 
     addComponent(world, ModelComponent, npc);
     ModelComponent.modelType[npc] = ModelTypes.sphere;
@@ -48,8 +53,15 @@ class NPC implements IEntity {
     addComponent(world, HealthComponent, npc);
     HealthComponent.amount[npc] = 10;
 
+    addComponent(world, AvoidDropComponent, npc);
+    AvoidDropComponent.height[npc] = 2;
+
     // addComponent(world, Clicked, npc);
     // Clicked.check[npc] = 0;
+
+    // addComponent(world, ViewComponent, npc);
+    // ViewComponent.length[npc] = 30;
+    // ViewComponent.fov[npc] = 10;
   }
 }
 

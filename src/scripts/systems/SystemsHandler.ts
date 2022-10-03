@@ -5,6 +5,7 @@ import createModelSystem from "./model";
 import createPlayerSystem from "./player";
 import checkLifeSystem from "./life";
 import createNPCSystem from "./npc";
+import handlePhysicsSystem from "./physics";
 
 class SystemHandler {
   private static instance: SystemHandler;
@@ -30,6 +31,7 @@ class SystemHandler {
     this.systems.push(createMovementSystem());
     this.systems.push(createModelSystem(scene));
     this.systems.push(checkLifeSystem());
+    this.systems.push(handlePhysicsSystem(scene));
   }
 
   /**

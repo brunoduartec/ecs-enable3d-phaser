@@ -1,6 +1,7 @@
 import { defineSystem, defineQuery, removeComponent } from "bitecs";
+import { ComponentFactory } from "../components/ComponentFactory";
 
-import Health from "../components/Health";
+const Health = ComponentFactory.getInstance().getProduct("Health");
 
 export default function checkLifeSystem() {
   const healthQuery = defineQuery([Health]);

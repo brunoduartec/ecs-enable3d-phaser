@@ -1,10 +1,13 @@
 import Phaser from "phaser";
 import { defineSystem, defineQuery } from "bitecs";
 
-import NPC from "../components/NPC";
-import Velocity from "../components/Velocity";
-import Rotation from "../components/Rotation";
-import Input, { Direction } from "../components/Input";
+import { ComponentFactory } from "../components/ComponentFactory";
+
+const NPC = ComponentFactory.getInstance().getProduct("NPC");
+const Rotation = ComponentFactory.getInstance().getProduct("Rotation");
+const Velocity = ComponentFactory.getInstance().getProduct("Velocity");
+const Input = ComponentFactory.getInstance().getProduct("Input");
+import { Direction } from "../components/Input";
 
 export default function createNPCSystem(scene: Phaser.Scene) {
   const cpuQuery = defineQuery([NPC, Velocity, Rotation, Input]);

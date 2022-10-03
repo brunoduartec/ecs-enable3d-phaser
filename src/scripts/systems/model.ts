@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { Scene3D } from "@enable3d/phaser-extension";
+
 import { ExtendedObject3D } from "@enable3d/common/dist/extendedObject3D";
 
 import {
@@ -11,19 +12,21 @@ import {
   IWorld,
 } from "bitecs";
 
-import Position from "../components/Position";
-import Velocity from "../components/Velocity";
-import Model, { ModelTypes } from "../components/Model";
-import Rotation from "../components/Rotation";
-import Jump from "../components/Jump";
-import Health from "../components/Health";
-import Clicked from "../components/Clicked";
-import THREE from "three";
+import { ComponentFactory } from "../components/ComponentFactory";
+
+const Position = ComponentFactory.getInstance().getProduct("Position");
+const Model = ComponentFactory.getInstance().getProduct("Model");
+const Rotation = ComponentFactory.getInstance().getProduct("Rotation");
+const Jump = ComponentFactory.getInstance().getProduct("Jump");
+const View = ComponentFactory.getInstance().getProduct("View");
+const Clicked = ComponentFactory.getInstance().getProduct("Clicked");
+
+import AvoidDrop from "../components/AvoidDrop";
+import { ModelTypes } from "../components/Model";
+import { ModelFactory } from "../ModelFactory";
 
 export default function createModelSystem(scene: Scene3D) {
-  const modelsById = new Map<number, ExtendedObject3D>();
-
-  const modelQuery = defineQuery([Position, Rotation, Velocity, Health, Model]);
+  const modelQuery = defineQuery([Position, Rotation, Model]);
 
   const modelQueryEnter = enterQuery(modelQuery);
   const modelQueryExit = exitQuery(modelQuery);
@@ -45,6 +48,33 @@ export default function createModelSystem(scene: Scene3D) {
     return { jumpStrength, isJumping, isGrounded, hasJump };
   }
 
+  function getAvoidDropInfo(world: IWorld, id: number) {
+    let dropHeight: number = 0;
+    let triggered: number = 0;
+    let hasAvoidDrop = false;
+
+    if (hasComponent(world, Jump, id)) {
+      dropHeight = AvoidDrop.height[id];
+      triggered = AvoidDrop.triggered[id];
+
+      hasAvoidDrop = true;
+    }
+    return { hasAvoidDrop, dropHeight, triggered };
+  }
+
+  function getViewInfo(world: IWorld, id: number) {
+    let viewLength = 0;
+    let fov = 0;
+    let hasView = false;
+
+    if (hasComponent(world, View, id)) {
+      viewLength = View.length[id];
+      fov = View.fov[id];
+      hasView = true;
+    }
+    return { hasView, viewLength, fov };
+  }
+
   function getClickedInfo(world: IWorld, id: number) {
     let check: boolean = false;
 
@@ -56,79 +86,43 @@ export default function createModelSystem(scene: Scene3D) {
     return { check };
   }
 
-  function addJumpSensor(
+  function addSensor(
     scene,
     item,
-    id,
+    name: string,
     xPosition: number,
     yPosition: number,
     zPosition: number,
-    height: number
-  ) {
-    const jumpSensor = new ExtendedObject3D();
-
-    jumpSensor.position.set(xPosition, yPosition - 0.5 * height, zPosition);
-    scene.third.physics.add.existing(jumpSensor, {
+    collisionCallback,
+    sensorObject: any = {
       mass: 1e-8,
       shape: "box",
       width: 0.2,
       height: 0.2,
       depth: 0.2,
-    });
-    jumpSensor.body.setCollisionFlags(4);
+    },
+    shouldRotate = false
+  ) {
+    const sensor = new ExtendedObject3D();
+    sensor.name = name;
 
-    // connect jumpSensor to robot
-    scene.third.physics.add.constraints.lock(item.body, jumpSensor.body);
+    if (shouldRotate) sensor.rotation.set(-Math.PI / 2, 0, 0);
+    sensor.position.set(xPosition, yPosition, zPosition);
 
-    jumpSensor.body.on.collision((otherObject, event) => {
-      if (event !== "end") {
-        Jump.isGrounded[id] = 1;
-        item.userData.onGround = true;
-      } else {
-        item.userData.onGround = false;
-        Jump.isGrounded[id] = 0;
+    scene.third.physics.add.existing(sensor, sensorObject);
+    sensor.body.setCollisionFlags(4);
+    sensor.castShadow = sensor.receiveShadow = false;
+
+    // connect sensor to robot
+    scene.third.physics.add.constraints.lock(item.body, sensor.body);
+
+    sensor.body.on.collision((otherObject, event) => {
+      if (collisionCallback) {
+        collisionCallback(otherObject, event);
       }
     });
-  }
 
-  // function registerRaycast(scene) {
-  //   const raycaster = new THREE.Raycaster();
-
-  //   scene.input.on("pointerdown", () => {
-  //     const { x, y } = scene.getPointer();
-
-  //     raycaster.setFromCamera({ x, y }, scene.third.camera);
-
-  //     const intersection = raycaster.intersectObjects(blocks);
-
-  //     if (intersection.length > 0) {
-  //       const block = intersection[0].object;
-  //       scene.selected = block;
-  //       scene.selected?.body.setCollisionFlags(2);
-
-  //       scene.mousePosition.copy(intersection[0].point);
-  //       scene.blockOffset.subVectors(
-  //         scene.selected.position,
-  //         scene.mousePosition
-  //       );
-  //     }
-
-  //     scene.prev = { x, y };
-  //   });
-
-  //   scene.input.on("pointerup", () => {
-  //     scene.selected?.body.setCollisionFlags(0);
-  //     scene.selected = null;
-  //   });
-  // }
-
-  function getPointer(scene) {
-    // calculate mouse position in normalized device coordinates
-    // (-1 to +1) for both components
-    const pointer = scene.input.activePointer;
-    const x = (pointer.x / scene.cameras.main.width) * 2 - 1;
-    const y = -(pointer.y / scene.cameras.main.height) * 2 + 1;
-    return { x, y };
+    return sensor;
   }
 
   return defineSystem((world: IWorld) => {
@@ -151,61 +145,117 @@ export default function createModelSystem(scene: Scene3D) {
 
       physicBody.body.setLinearFactor(1, 1, 0);
       physicBody.body.setAngularFactor(0, 0, 0);
-      // physicBody.body.setFriction(0);
+
+      physicBody.userData.eid = id;
 
       const { hasJump } = getJumpInfo(world, id);
       if (hasJump) {
-        addJumpSensor(
+        addSensor(
           scene,
           physicBody,
-          id,
+          `${physicBody.name}_sensor_jump`,
           Position.x[id],
-          Position.y[id],
+          Position.y[id] - 0.5 * height,
           Position.z[id],
-          height
+          (otherObject, event) => {
+            if (event !== "end") {
+              Jump.isGrounded[id] = 1;
+              physicBody.userData.onGround = true;
+            } else {
+              physicBody.userData.onGround = false;
+              Jump.isGrounded[id] = 0;
+            }
+          }
         );
       }
 
-      modelsById.set(id, physicBody);
-    }
-
-    const entities = modelQuery(world);
-    for (let i = 0; i < entities.length; ++i) {
-      const id = entities[i];
-
-      const model = modelsById.get(id);
-      if (!model) {
-        // log an error
-        continue;
+      const { hasAvoidDrop, dropHeight } = getAvoidDropInfo(world, id);
+      if (hasAvoidDrop) {
+        const dropSensorObject = {
+          mass: 1e-8,
+          shape: "box",
+          width: 0.2,
+          height: dropHeight,
+          depth: 0.2,
+        };
+        addSensor(
+          scene,
+          physicBody,
+          `${physicBody.name}_sensor_drop`,
+          Position.x[id],
+          Position.y[id] - dropHeight * 0.6,
+          Position.z[id] + 0.8 * height,
+          (otherObject, event) => {
+            if (event !== "end") {
+              AvoidDrop.triggered[id] = 0;
+            } else {
+              AvoidDrop.triggered[id] = 1;
+            }
+          },
+          dropSensorObject
+        );
       }
 
-      const velocityX = Velocity.x[id];
-      const velocityY = Velocity.y[id];
-      const velocityZ = Velocity.z[id];
+      const { hasView, viewLength, fov } = getViewInfo(world, id);
+      if (hasView) {
+        const viewSensorObject = {
+          mass: 1e-8,
+          shape: "cone",
+          radius: fov,
+          height: viewLength,
+        };
+        addSensor(
+          scene,
+          physicBody,
+          `${physicBody.name}_sensor_view`,
+          Position.x[id],
+          Position.y[id],
+          Position.z[id] + viewLength / 2,
+          (otherObject, event) => {
+            console.log("Lista vendo", View.viewedList[id]);
+            if (otherObject.userData.eid) {
+              const itemToAdd = otherObject.userData.eid;
+              if (event !== "end") {
+                console.log("Encontrou", itemToAdd);
 
-      model.body.setVelocityX(velocityX);
-      model.body.setVelocityZ(velocityZ);
+                const index = View.viewedList[id].findIndex((m) => {
+                  return m === 0;
+                });
 
-      const { jumpStrength, isJumping, isGrounded, hasJump } = getJumpInfo(
-        world,
-        id
-      );
-      if (hasJump && isGrounded) {
-        if (isJumping) {
-          model.body.applyForceY(jumpStrength);
-          Jump.isJumping[id] = 0;
-        }
+                console.log("Indice pra adicionar", index);
+
+                if (index >= 0) View.viewedList[id][index] = itemToAdd;
+
+                // View.viewed[id].push(otherObject.userData.eid);
+              } else {
+                const index = View.viewedList[id].findIndex((m) => {
+                  return m === itemToAdd;
+                });
+
+                console.log("Indice pra remover", index);
+
+                if (index >= 0) {
+                  View.viewedList[id][index] = 0;
+                }
+
+                // View.viewed[id]--;
+                console.log("Desviu", otherObject.userData.eid);
+              }
+            }
+          },
+          viewSensorObject,
+          true
+        );
       }
 
-      // model.body.setVelocity(velocityX, 0, velocityZ);
+      ModelFactory.getInstance().addModel(id, physicBody);
     }
 
     const entitiesExited = modelQueryExit(world);
     for (let i = 0; i < entitiesExited.length; ++i) {
-      console.log("Removeu", i);
       const id = entitiesExited[i];
 
-      const objectToDestroy = modelsById.get(id);
+      const objectToDestroy = ModelFactory.getInstance().getModel(id);
 
       if (!objectToDestroy) {
         // log an error

@@ -1,11 +1,14 @@
 import Phaser from "phaser";
 import { defineSystem, defineQuery } from "bitecs";
 
-import Velocity from "../components/Velocity";
-import Rotation from "../components/Rotation";
-import Player from "../components/Player";
-import Input, { Direction } from "../components/Input";
-import Jump from "../components/Jump";
+import { ComponentFactory } from "../components/ComponentFactory";
+
+const Player = ComponentFactory.getInstance().getProduct("Player");
+const Rotation = ComponentFactory.getInstance().getProduct("Rotation");
+const Velocity = ComponentFactory.getInstance().getProduct("Velocity");
+const Input = ComponentFactory.getInstance().getProduct("Input");
+const Jump = ComponentFactory.getInstance().getProduct("Jump");
+import { Direction } from "../components/Input";
 
 interface keysProps {
   up: Phaser.Input.Keyboard.Key;

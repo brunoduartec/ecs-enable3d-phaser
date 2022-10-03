@@ -1,7 +1,10 @@
-import { defineComponent, Types } from 'bitecs'
+import { defineComponent, Types } from "bitecs";
 
 export const Rotation = defineComponent({
-	angle: Types.f32
-})
+  x: Types.f32,
+  y: Types.f32,
+  z: Types.f32,
+  speed: Types.i8,
+});
 
-export default Rotation
+export default Rotation;
