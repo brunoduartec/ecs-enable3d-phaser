@@ -12,6 +12,7 @@ import Clicked from "./Clicked";
 import Health from "./Health";
 import AvoidDrop from "./AvoidDrop";
 import View from "./View";
+import Target from "./Target";
 
 class ComponentFactory extends Concretefactory {
   private static instance: ComponentFactory;
@@ -34,6 +35,7 @@ class ComponentFactory extends Concretefactory {
     this.addProduct("Health", Health);
     this.addProduct("AvoidDrop", AvoidDrop);
     this.addProduct("View", View);
+    this.addProduct("Target", Target);
   }
 
   /**

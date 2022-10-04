@@ -212,34 +212,28 @@ export default function createModelSystem(scene: Scene3D) {
           Position.y[id],
           Position.z[id] + viewLength / 2,
           (otherObject, event) => {
-            console.log("Lista vendo", View.viewedList[id]);
-            if (otherObject.userData.eid) {
+            const initial = -1;
+            if (otherObject?.userData) {
               const itemToAdd = otherObject.userData.eid;
+              let alreadySeen = View.viewedList[id].includes(itemToAdd);
+
               if (event !== "end") {
-                console.log("Encontrou", itemToAdd);
-
-                const index = View.viewedList[id].findIndex((m) => {
-                  return m === 0;
-                });
-
-                console.log("Indice pra adicionar", index);
-
-                if (index >= 0) View.viewedList[id][index] = itemToAdd;
-
-                // View.viewed[id].push(otherObject.userData.eid);
-              } else {
-                const index = View.viewedList[id].findIndex((m) => {
-                  return m === itemToAdd;
-                });
-
-                console.log("Indice pra remover", index);
-
-                if (index >= 0) {
-                  View.viewedList[id][index] = 0;
+                if (!alreadySeen) {
+                  const index = View.viewedList[id].findIndex((m) => {
+                    return m === initial;
+                  });
+                  if (index >= 0) {
+                    View.viewedList[id][index] = itemToAdd;
+                  }
                 }
+              } else {
+                if (alreadySeen) {
+                  const hasIndex = View.viewedList[id].findIndex((m) => {
+                    return m === itemToAdd;
+                  });
 
-                // View.viewed[id]--;
-                console.log("Desviu", otherObject.userData.eid);
+                  View.viewedList[id][hasIndex] = initial;
+                }
               }
             }
           },

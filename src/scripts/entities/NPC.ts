@@ -54,14 +54,15 @@ class NPC implements IEntity {
     HealthComponent.amount[npc] = 10;
 
     addComponent(world, AvoidDropComponent, npc);
-    AvoidDropComponent.height[npc] = 2;
+    AvoidDropComponent.height[npc] = 10;
 
     // addComponent(world, Clicked, npc);
     // Clicked.check[npc] = 0;
 
-    // addComponent(world, ViewComponent, npc);
-    // ViewComponent.length[npc] = 30;
-    // ViewComponent.fov[npc] = 10;
+    addComponent(world, ViewComponent, npc);
+    ViewComponent.length[npc] = 30;
+    ViewComponent.fov[npc] = 10;
+    ViewComponent.viewedList[npc] = [-1, -1, -1, -1, -1];
   }
 }
 
