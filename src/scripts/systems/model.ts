@@ -17,11 +17,13 @@ import { ComponentFactory } from "../components/ComponentFactory";
 const Position = ComponentFactory.getInstance().getProduct("Position");
 const Model = ComponentFactory.getInstance().getProduct("Model");
 const Rotation = ComponentFactory.getInstance().getProduct("Rotation");
+const AvoidDrop = ComponentFactory.getInstance().getProduct("AvoidDrop");
+
 const Jump = ComponentFactory.getInstance().getProduct("Jump");
 const View = ComponentFactory.getInstance().getProduct("View");
 const Clicked = ComponentFactory.getInstance().getProduct("Clicked");
 
-import AvoidDrop from "../components/AvoidDrop";
+
 import { ModelTypes } from "../components/Model";
 import { ModelFactory } from "../ModelFactory";
 
@@ -53,7 +55,7 @@ export default function createModelSystem(scene: Scene3D) {
     let triggered: number = 0;
     let hasAvoidDrop = false;
 
-    if (hasComponent(world, Jump, id)) {
+    if (hasComponent(world, AvoidDrop, id)) {
       dropHeight = AvoidDrop.height[id];
       triggered = AvoidDrop.triggered[id];
 

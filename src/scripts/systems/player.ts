@@ -27,10 +27,15 @@ export default function createPlayerSystem(keys: keysProps) {
     for (let i = 0; i < entities.length; ++i) {
       const id = entities[i];
 
+      let anyButtonPressed = keys.up.isDown || keys.down.isDown || keys.left.isDown || keys.right.isDown
+
+
       Input.direction[id][Direction.Up] = keys.up.isDown;
       Input.direction[id][Direction.Down] = keys.down.isDown;
       Input.direction[id][Direction.Left] = keys.left.isDown;
       Input.direction[id][Direction.Right] = keys.right.isDown;
+      Input.direction[id][Direction.None] = !anyButtonPressed
+
 
 
       // if (keys.up.isDown) {

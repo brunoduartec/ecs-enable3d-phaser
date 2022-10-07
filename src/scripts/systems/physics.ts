@@ -131,8 +131,8 @@ export default function handlePhysicsSystem(scene: Scene3D) {
         model.body.setVelocity(0, 0, 0);
       }
 
-      Velocity.speed[id] = 0;
-      Rotation.x[id] = 0;
+      // Velocity.speed[id] = 0;
+      // Rotation.x[id] = 0;
 
       const { jumpStrength, isJumping, isGrounded, hasJump } = getJumpInfo(
         world,

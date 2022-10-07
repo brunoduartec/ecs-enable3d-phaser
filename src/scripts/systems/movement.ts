@@ -12,19 +12,19 @@ import { Direction } from "../components/Input";
 const effectByDirection = {
   [Direction.Up]: function ({ id, speed }) {
     Velocity.speed[id] = speed;
-    console.log("Up", { id, speed })
   },
   [Direction.Down]: function ({ id, speed }) {
-    console.log("Down", { id, speed })
     Velocity.speed[id] = -speed;
   },
   [Direction.Right]: function ({ id }) {
-    console.log("Right", { id })
     Rotation.x[id] -= Rotation.speed[id];
   },
   [Direction.Left]: function ({ id }) {
-    console.log("Left", { id })
     Rotation.x[id] += Rotation.speed[id];
+  },
+  [Direction.None]: function ({ id }) {
+    Rotation.x[id] = 0;
+    Velocity.speed[id] = 0;
   }
 }
 export default function createMovementSystem() {
@@ -43,9 +43,7 @@ export default function createMovementSystem() {
       for (let index = 0; index < directions.length; index++) {
         const direction = directions[index];
 
-        // console.log("Effect", id, index, direction)
         if (direction) {
-          console.log("Effect", index)
           effectByDirection[index]({ id, speed })
         }
 

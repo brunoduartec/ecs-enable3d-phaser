@@ -23,11 +23,8 @@ function foundPlayer(world: IWorld, players: number[], id: number) {
 
   let PlayerFound;
   if (found) {
-    console.log("Encontrou");
     players.forEach((m) => {
-      console.log("player", m);
       if (viewedList.includes(m)) {
-        console.log("Achou", m);
         PlayerFound = m;
         return m;
       }
@@ -58,7 +55,6 @@ export default function chasePlayerSystem(scene: Phaser.Scene) {
         Target.z[id] = Position.z[playerFound.PlayerFound];
       } else {
         removeComponent(world, Target, id);
-        // console.log(`Eu ${id} perdi o Player`);
       }
     }
 

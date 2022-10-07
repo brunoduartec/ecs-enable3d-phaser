@@ -49,9 +49,9 @@ export default class MainScene extends Scene3D {
 
     this.systemHandler = SystemHandler.getInstance(this);
 
-    // for (let i = 0; i < 5; ++i) {
-    this.createNPC(10, 10);
-    // }
+    for (let i = 0; i < 5; ++i) {
+      this.createNPC(10, 10);
+    }
   }
 
   update() {
