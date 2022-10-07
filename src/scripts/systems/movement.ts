@@ -9,6 +9,24 @@ const Input = ComponentFactory.getInstance().getProduct("Input");
 
 import { Direction } from "../components/Input";
 
+const effectByDirection = {
+  [Direction.Up]: function ({ id, speed }) {
+    Velocity.speed[id] = speed;
+    console.log("Up", { id, speed })
+  },
+  [Direction.Down]: function ({ id, speed }) {
+    console.log("Down", { id, speed })
+    Velocity.speed[id] = -speed;
+  },
+  [Direction.Right]: function ({ id }) {
+    console.log("Right", { id })
+    Rotation.x[id] -= Rotation.speed[id];
+  },
+  [Direction.Left]: function ({ id }) {
+    console.log("Left", { id })
+    Rotation.x[id] += Rotation.speed[id];
+  }
+}
 export default function createMovementSystem() {
   const movementQuery = defineQuery([Position, Velocity, Input, Rotation]);
 
@@ -18,41 +36,58 @@ export default function createMovementSystem() {
     for (let i = 0; i < entities.length; ++i) {
       const id = entities[i];
 
-      const direction = Input.direction[id];
+      const directions = Input.direction[id];
       const speed = Input.speed[id];
 
-      switch (direction) {
-        case Direction.None:
-          Velocity.speed[id] = 0;
-          Rotation.x[id] = 0;
-          break;
 
-        case Direction.Left:
-          // Velocity.x[id] = speed;
-          // Velocity.z[id] = 0;
-          Rotation.x[id] += Rotation.speed[id];
-          break;
+      for (let index = 0; index < directions.length; index++) {
+        const direction = directions[index];
 
-        case Direction.Right:
-          // Velocity.x[id] = speed;
-          // Velocity.z[id] = 0;
-          // Rotation.angle[id] = 0;
-          Rotation.x[id] -= Rotation.speed[id];
-          break;
+        // console.log("Effect", id, index, direction)
+        if (direction) {
+          console.log("Effect", index)
+          effectByDirection[index]({ id, speed })
+        }
 
-        case Direction.Up:
-          Velocity.speed[id] = speed;
-          // Velocity.z[id] = speed;
-          // Rotation.angle[id] = 270;
-          Rotation.x[id] = 0;
-          break;
-
-        case Direction.Down:
-          Velocity.speed[id] = speed;
-          // Velocity.z[id] = speed;
-          Rotation.x[id] += 180;
-          break;
       }
+
+      // switch (direction) {
+      //   case Direction.None:
+      //     break;
+
+      //   case Direction.Left:
+      //     effectByDirection["Left"]({ id })
+      //     break;
+
+      //   case Direction.Right:
+      //     effectByDirection["Right"]({ id })
+      //     break;
+
+      //   case Direction.Up:
+      //     effectByDirection["Up"]({ id, speed })
+      //     break;
+
+      //   case Direction.Down:
+      //     effectByDirection["Down"]({ id, speed })
+      //     break;
+
+      //   case Direction.UpRight:
+      //     effectByDirection["Up"]({ id, speed })
+      //     effectByDirection["Right"]({ id })
+      //     break;
+      //   case Direction.UpLeft:
+      //     effectByDirection["Up"]({ id, speed })
+      //     effectByDirection["Left"]({ id })
+      //     break;
+      //   case Direction.DownRight:
+      //     effectByDirection["Down"]({ id, speed })
+      //     effectByDirection["Right"]({ id })
+      //     break;
+      //   case Direction.DownLeft:
+      //     effectByDirection["Down"]({ id, speed })
+      //     effectByDirection["Left"]({ id })
+      //     break;
+      // }
 
       //   Position.x[id] += Velocity.x[id];
       //   Position.y[id] += Velocity.z[id];

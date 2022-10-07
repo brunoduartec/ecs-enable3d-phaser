@@ -26,17 +26,40 @@ export default function createPlayerSystem(keys: keysProps) {
 
     for (let i = 0; i < entities.length; ++i) {
       const id = entities[i];
-      if (keys.left.isDown) {
-        Input.direction[id] = Direction.Left;
-      } else if (keys.right.isDown) {
-        Input.direction[id] = Direction.Right;
-      } else if (keys.up.isDown) {
-        Input.direction[id] = Direction.Up;
-      } else if (keys.down.isDown) {
-        Input.direction[id] = Direction.Down;
-      } else {
-        Input.direction[id] = Direction.None;
-      }
+
+      Input.direction[id][Direction.Up] = keys.up.isDown;
+      Input.direction[id][Direction.Down] = keys.down.isDown;
+      Input.direction[id][Direction.Left] = keys.left.isDown;
+      Input.direction[id][Direction.Right] = keys.right.isDown;
+
+
+      // if (keys.up.isDown) {
+      //   Input.direction[id] = Direction.Up;
+      //   if (keys.left.isDown) {
+      //     Input.direction[id] = Direction.UpLeft;
+      //   }
+      //   if (keys.right.isDown) {
+      //     Input.direction[id] = Direction.UpRight;
+      //   }
+      // }
+
+      // if (keys.down.isDown) {
+      //   Input.direction[id] = Direction.Down;
+      //   if (keys.left.isDown) {
+      //     Input.direction[id] = Direction.DownLeft;
+      //   }
+      //   if (keys.right.isDown) {
+      //     Input.direction[id] = Direction.DownRight;
+      //   }
+      // }
+
+      // if (keys.left.isDown) {
+      //   Input.direction[id] = Direction.Left;
+      // }
+      // if (keys.right.isDown) {
+      //   Input.direction[id] = Direction.Right;
+      // }
+
 
       if (keys.jump.isDown) {
         Jump.isJumping[id] = 1;

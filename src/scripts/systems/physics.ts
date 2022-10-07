@@ -132,6 +132,7 @@ export default function handlePhysicsSystem(scene: Scene3D) {
       }
 
       Velocity.speed[id] = 0;
+      Rotation.x[id] = 0;
 
       const { jumpStrength, isJumping, isGrounded, hasJump } = getJumpInfo(
         world,

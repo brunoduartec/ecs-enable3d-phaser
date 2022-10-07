@@ -38,7 +38,7 @@ export default function createNPCSystem(scene: Phaser.Scene) {
         } else {
           Input.direction[id] = Direction.Right;
         }
-        console.log("Vai girar", diff);
+        console.log("Vai girar", diff, Input.direction[id]);
         // Rotation.x[id] += lookAtPosition.x - Position.x[id];
         // Velocity.speed[id] = 10;
       } else {
@@ -51,30 +51,34 @@ export default function createNPCSystem(scene: Phaser.Scene) {
         switch (Phaser.Math.Between(0, 20)) {
           // left
           case 0: {
-            Input.direction[id] = Direction.Left;
+            Input.direction[id][Direction.Left] = 1;
             break;
           }
 
           // right
           case 1: {
-            Input.direction[id] = Direction.Right;
+            Input.direction[id][Direction.Right] = 1;
             break;
           }
 
           // up
           case 2: {
-            Input.direction[id] = Direction.Up;
+            Input.direction[id][Direction.Up] = 1;
             break;
           }
 
           // down
           case 3: {
-            Input.direction[id] = Direction.Down;
+            Input.direction[id][Direction.Down] = 1;
             break;
           }
 
           default: {
-            Input.direction[id] = Direction.None;
+            console.log(Input.direction[id])
+            Input.direction[id][Direction.Up] = 0
+            Input.direction[id][Direction.Down] = 0
+            Input.direction[id][Direction.Left] = 0
+            Input.direction[id][Direction.Right] = 0
             break;
           }
         }
