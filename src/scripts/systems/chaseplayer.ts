@@ -53,6 +53,7 @@ export default function chasePlayerSystem(scene: Phaser.Scene) {
         Target.x[id] = Position.x[playerFound.PlayerFound];
         Target.y[id] = Position.y[playerFound.PlayerFound];
         Target.z[id] = Position.z[playerFound.PlayerFound];
+
       } else {
         removeComponent(world, Target, id);
       }

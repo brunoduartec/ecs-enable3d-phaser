@@ -17,16 +17,18 @@ const effectByDirection = {
     Velocity.speed[id] = -speed;
   },
   [Direction.Right]: function ({ id }) {
-    Rotation.x[id] -= Rotation.speed[id];
+    Rotation.x[id] = -Rotation.speed[id];
   },
   [Direction.Left]: function ({ id }) {
-    Rotation.x[id] += Rotation.speed[id];
+    Rotation.x[id] = Rotation.speed[id];
   },
   [Direction.None]: function ({ id }) {
     Rotation.x[id] = 0;
     Velocity.speed[id] = 0;
   }
 }
+
+
 export default function createMovementSystem() {
   const movementQuery = defineQuery([Position, Velocity, Input, Rotation]);
 
@@ -40,55 +42,21 @@ export default function createMovementSystem() {
       const speed = Input.speed[id];
 
 
-      for (let index = 0; index < directions.length; index++) {
+      //reset moviment
+      // effectByDirection[Direction.None]({ id })
+
+      effectByDirection[Direction.None]({ id })
+
+      let directionsConcat = ""
+      for (let index = 0; index < directions.length - 1; index++) {
         const direction = directions[index];
 
         if (direction) {
+          directionsConcat = directionsConcat.concat(`${index}`).concat("=>")
           effectByDirection[index]({ id, speed })
         }
 
       }
-
-      // switch (direction) {
-      //   case Direction.None:
-      //     break;
-
-      //   case Direction.Left:
-      //     effectByDirection["Left"]({ id })
-      //     break;
-
-      //   case Direction.Right:
-      //     effectByDirection["Right"]({ id })
-      //     break;
-
-      //   case Direction.Up:
-      //     effectByDirection["Up"]({ id, speed })
-      //     break;
-
-      //   case Direction.Down:
-      //     effectByDirection["Down"]({ id, speed })
-      //     break;
-
-      //   case Direction.UpRight:
-      //     effectByDirection["Up"]({ id, speed })
-      //     effectByDirection["Right"]({ id })
-      //     break;
-      //   case Direction.UpLeft:
-      //     effectByDirection["Up"]({ id, speed })
-      //     effectByDirection["Left"]({ id })
-      //     break;
-      //   case Direction.DownRight:
-      //     effectByDirection["Down"]({ id, speed })
-      //     effectByDirection["Right"]({ id })
-      //     break;
-      //   case Direction.DownLeft:
-      //     effectByDirection["Down"]({ id, speed })
-      //     effectByDirection["Left"]({ id })
-      //     break;
-      // }
-
-      //   Position.x[id] += Velocity.x[id];
-      //   Position.y[id] += Velocity.z[id];
     }
 
     return world;

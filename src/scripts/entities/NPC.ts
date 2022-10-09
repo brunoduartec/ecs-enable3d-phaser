@@ -39,13 +39,14 @@ class NPC implements IEntity {
 
     addComponent(world, VelocityComponent, npc);
     addComponent(world, RotationComponent, npc);
-    RotationComponent.speed[npc] = 0.3;
+    RotationComponent.speed[npc] = 1;
 
     addComponent(world, ModelComponent, npc);
     ModelComponent.modelType[npc] = ModelTypes.sphere;
 
     addComponent(world, NPCComponent, npc);
-    NPCComponent.timeBetweenActions[npc] = Phaser.Math.Between(0, 500);
+    NPCComponent.timeBetweenActions[npc] = 500//Phaser.Math.Between(0, 500);
+
 
     addComponent(world, InputComponent, npc);
     InputComponent.speed[npc] = 3;

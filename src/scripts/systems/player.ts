@@ -29,7 +29,6 @@ export default function createPlayerSystem(keys: keysProps) {
 
       let anyButtonPressed = keys.up.isDown || keys.down.isDown || keys.left.isDown || keys.right.isDown
 
-
       Input.direction[id][Direction.Up] = keys.up.isDown;
       Input.direction[id][Direction.Down] = keys.down.isDown;
       Input.direction[id][Direction.Left] = keys.left.isDown;

@@ -1,0 +1,18 @@
+{
+    "add": [
+        "View",
+        "AvoidDrop",
+        "Clicked",
+        "Health",
+        "Input",
+        "Jump",
+        "Model",
+        "NPC",
+        "Player",
+        "Position",
+        "Rotation",
+        "Target",
+        "Velocity"
+    ],
+    "exception": []
+}

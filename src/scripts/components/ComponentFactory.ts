@@ -13,6 +13,8 @@ import Health from "./Health";
 import AvoidDrop from "./AvoidDrop";
 import View from "./View";
 import Target from "./Target";
+import list from "./component-list.json"
+
 
 class ComponentFactory extends Concretefactory {
   private static instance: ComponentFactory;
