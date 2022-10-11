@@ -11,7 +11,7 @@ const Input = ComponentFactory.getInstance().getProduct("Input");
 const Target = ComponentFactory.getInstance().getProduct("Target");
 
 import { Direction } from "../components/Input";
-import { Vector3 } from "three";
+import { Vector2, Vector3 } from "three";
 import { ModelFactory } from "../ModelFactory";
 import { ExtendedObject3D } from "@enable3d/phaser-extension";
 
@@ -27,54 +27,54 @@ export default function createNPCSystem(scene: Phaser.Scene) {
 
       NPC.accumulatedTime[id] += dt;
 
-      if (NPC.accumulatedTime[id] < NPC.timeBetweenActions[id]) {
-        continue;
-      }
-
-      NPC.accumulatedTime[id] = 0;
-
       if (Target.x[id]) {
-        let playerPosition = new Vector3(Target.x[id], Target.y[id], Target.z[id]);
-        let npcPosition = new Vector3(Position.x[id], Position.y[id], Position.z[id])
+        let playerPosition = new Vector2(Target.x[id], Target.z[id]);
+        let npcPosition = new Vector2(Position.x[id], Position.z[id]);
 
+        let playerDirectionVector: Vector2 = playerPosition.sub(npcPosition);
+        const model = ModelFactory.getInstance().getModel(id);
 
-        console.log(playerPosition, npcPosition)
+        // model?.lookAt(playerPosition);s
 
-        // let playerDirectionVector = playerPosition.sub(npcPosition);
-        // const model = ModelFactory.getInstance().getModel(id);
+        if (!model) {
+          // log an error
+          continue;
+        }
 
-        // if (!model) {
-        //   // log an error
-        //   continue;
-        // }
+        const rotation = model.getWorldDirection(model.rotation.toVector3());
+        const theta = Math.atan2(rotation.x, rotation.z);
 
-        // const rotation = model.getWorldDirection(model.rotation.toVector3());
-        // const theta = Math.atan2(rotation.x, rotation.z);
+        const npcForwardVector = new Vector3(
+          Math.sin(theta),
+          model.body.position.y,
+          Math.cos(theta)
+        );
 
-        // const npcForwardVector = new Vector3(Math.sin(theta), model.body.velocity.y, Math.cos(theta))
+        const npcForwardVectorProjection = new Vector2(
+          npcForwardVector.x,
+          npcForwardVector.z
+        );
 
-        // const crossProductModule = npcForwardVector.cross(playerDirectionVector).lengthSq()
-        // const dotProduct = npcForwardVector.dot(playerDirectionVector)
-        // const diffAngle = Math.atan2(crossProductModule, dotProduct)
+        let cross = npcForwardVectorProjection.cross(playerDirectionVector);
 
-        // console.log("Angle", diffAngle)
-
-        const diff = playerPosition.x - npcPosition.x
-
-        console.log(diff)
-
-        if (diff > 0) {
-          // Input.direction[id][Direction.Left] = true;
-          Rotation.x[id] = 3
+        if (cross < 0) {
+          Input.intensity[id] = 0.3;
+          Input.direction[id][Direction.Left] = true;
           Input.direction[id][Direction.Up] = true;
-
         } else {
-          Rotation.x[id] = -3
-          // Input.direction[id][Direction.Right] = true;
+          Input.intensity[id] = 0.3;
+          Input.direction[id][Direction.Right] = true;
           Input.direction[id][Direction.Up] = true;
         }
       } else {
-        const randomMoviment = Phaser.Math.Between(0, 20)
+        if (NPC.accumulatedTime[id] < NPC.timeBetweenActions[id]) {
+          continue;
+        }
+
+        NPC.accumulatedTime[id] = 0;
+        const randomMoviment = Phaser.Math.Between(0, 20);
+
+        Input.intensity[id] = 1;
 
         switch (randomMoviment) {
           // left
@@ -84,7 +84,7 @@ export default function createNPCSystem(scene: Phaser.Scene) {
             Input.direction[id][Direction.Down] = false;
             Input.direction[id][Direction.Left] = true;
             Input.direction[id][Direction.Right] = false;
-            Input.direction[id][Direction.None] = false
+            Input.direction[id][Direction.None] = false;
             break;
           }
 
@@ -95,7 +95,7 @@ export default function createNPCSystem(scene: Phaser.Scene) {
             Input.direction[id][Direction.Down] = false;
             Input.direction[id][Direction.Left] = false;
             Input.direction[id][Direction.Right] = true;
-            Input.direction[id][Direction.None] = false
+            Input.direction[id][Direction.None] = false;
             break;
           }
 
@@ -106,7 +106,7 @@ export default function createNPCSystem(scene: Phaser.Scene) {
             Input.direction[id][Direction.Down] = false;
             Input.direction[id][Direction.Left] = false;
             Input.direction[id][Direction.Right] = false;
-            Input.direction[id][Direction.None] = false
+            Input.direction[id][Direction.None] = false;
             break;
           }
 
@@ -117,7 +117,7 @@ export default function createNPCSystem(scene: Phaser.Scene) {
             Input.direction[id][Direction.Down] = true;
             Input.direction[id][Direction.Left] = false;
             Input.direction[id][Direction.Right] = false;
-            Input.direction[id][Direction.None] = false
+            Input.direction[id][Direction.None] = false;
             break;
           }
 
@@ -127,16 +127,11 @@ export default function createNPCSystem(scene: Phaser.Scene) {
             Input.direction[id][Direction.Down] = false;
             Input.direction[id][Direction.Left] = false;
             Input.direction[id][Direction.Right] = false;
-            Input.direction[id][Direction.None] = true
+            Input.direction[id][Direction.None] = true;
             break;
           }
         }
-
-
       }
-
-
-
     }
 
     return world;

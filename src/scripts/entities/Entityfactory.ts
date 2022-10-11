@@ -36,7 +36,8 @@ class EntityFactory extends Concretefactory {
     const Product: any = this.getProduct(name);
     const product = new Product();
 
-    product.create(world, props);
+    const id = product.create(world, props);
+    return id;
   }
 }
 

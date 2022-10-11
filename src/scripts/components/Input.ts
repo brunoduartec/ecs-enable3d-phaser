@@ -3,6 +3,7 @@ import { defineComponent, Types } from "bitecs";
 export const Input = defineComponent({
   direction: [Types.ui8, 5],
   speed: Types.ui8,
+  intensity: Types.f32,
 });
 
 export enum Direction {
@@ -10,7 +11,7 @@ export enum Direction {
   Right,
   Up,
   Down,
-  None
+  None,
 }
 
 export default Input;

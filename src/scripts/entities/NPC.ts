@@ -45,11 +45,11 @@ class NPC implements IEntity {
     ModelComponent.modelType[npc] = ModelTypes.sphere;
 
     addComponent(world, NPCComponent, npc);
-    NPCComponent.timeBetweenActions[npc] = 500//Phaser.Math.Between(0, 500);
-
+    NPCComponent.timeBetweenActions[npc] = 500; //Phaser.Math.Between(0, 500);
 
     addComponent(world, InputComponent, npc);
     InputComponent.speed[npc] = 3;
+    InputComponent.intensity[npc] = 1;
 
     addComponent(world, HealthComponent, npc);
     HealthComponent.amount[npc] = 10;

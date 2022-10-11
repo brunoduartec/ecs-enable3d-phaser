@@ -17,17 +17,16 @@ const effectByDirection = {
     Velocity.speed[id] = -speed;
   },
   [Direction.Right]: function ({ id }) {
-    Rotation.x[id] = -Rotation.speed[id];
+    Rotation.x[id] = -Rotation.speed[id] * Input.intensity[id];
   },
   [Direction.Left]: function ({ id }) {
-    Rotation.x[id] = Rotation.speed[id];
+    Rotation.x[id] = Rotation.speed[id] * Input.intensity[id];
   },
   [Direction.None]: function ({ id }) {
     Rotation.x[id] = 0;
     Velocity.speed[id] = 0;
-  }
-}
-
+  },
+};
 
 export default function createMovementSystem() {
   const movementQuery = defineQuery([Position, Velocity, Input, Rotation]);
@@ -41,21 +40,19 @@ export default function createMovementSystem() {
       const directions = Input.direction[id];
       const speed = Input.speed[id];
 
-
       //reset moviment
       // effectByDirection[Direction.None]({ id })
 
-      effectByDirection[Direction.None]({ id })
+      effectByDirection[Direction.None]({ id });
 
-      let directionsConcat = ""
+      let directionsConcat = "";
       for (let index = 0; index < directions.length - 1; index++) {
         const direction = directions[index];
 
         if (direction) {
-          directionsConcat = directionsConcat.concat(`${index}`).concat("=>")
-          effectByDirection[index]({ id, speed })
+          directionsConcat = directionsConcat.concat(`${index}`).concat("=>");
+          effectByDirection[index]({ id, speed });
         }
-
       }
     }
 

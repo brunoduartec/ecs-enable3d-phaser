@@ -54,6 +54,8 @@ class Player implements IEntity {
 
     RotationComponent.speed[player] = 1;
 
+    InputComponent.intensity[player] = 1;
+
     // ViewComponent.length[player] = 10;
     // ViewComponent.fov[player] = 3;
     // ViewComponent.viewedList[player] = [-1, -1, -1, -1, -1];
