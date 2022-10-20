@@ -5,26 +5,37 @@ import { ComponentFactory } from "../components/ComponentFactory";
 const Position = ComponentFactory.getInstance().getProduct("Position");
 const Rotation = ComponentFactory.getInstance().getProduct("Rotation");
 const Velocity = ComponentFactory.getInstance().getProduct("Velocity");
+const Jump = ComponentFactory.getInstance().getProduct("Jump");
 const Input = ComponentFactory.getInstance().getProduct("Input");
 
-import { Direction } from "../components/Input";
+import { Action } from "../components/Input";
 
-const effectByDirection = {
-  [Direction.Up]: function ({ id, speed }) {
+const effectByAction = {
+  [Action.Up]: function ({ id, speed }) {
     Velocity.speed[id] = speed;
   },
-  [Direction.Down]: function ({ id, speed }) {
+  [Action.Down]: function ({ id, speed }) {
     Velocity.speed[id] = -speed;
   },
-  [Direction.Right]: function ({ id }) {
+  [Action.Right]: function ({ id }) {
     Rotation.x[id] = -Rotation.speed[id] * Input.intensity[id];
   },
-  [Direction.Left]: function ({ id }) {
+  [Action.Left]: function ({ id }) {
     Rotation.x[id] = Rotation.speed[id] * Input.intensity[id];
   },
-  [Direction.None]: function ({ id }) {
+  [Action.Jump]: function ({ id }) {
+    console.log("Jump");
+    Jump.isJumping[id] = 1;
+  },
+  [Action.None]: function ({ id }) {
     Rotation.x[id] = 0;
     Velocity.speed[id] = 0;
+  },
+};
+
+const noEffectByAction = {
+  [Action.Jump]: function ({ id }) {
+    Jump.isJumping[id] = 0;
   },
 };
 
@@ -37,21 +48,20 @@ export default function createMovementSystem() {
     for (let i = 0; i < entities.length; ++i) {
       const id = entities[i];
 
-      const directions = Input.direction[id];
+      const actions = Input.action[id];
       const speed = Input.speed[id];
 
-      //reset moviment
-      // effectByDirection[Direction.None]({ id })
+      effectByAction[Action.None]({ id });
 
-      effectByDirection[Direction.None]({ id });
+      for (let index = 0; index < actions.length - 1; index++) {
+        const action = actions[index];
 
-      let directionsConcat = "";
-      for (let index = 0; index < directions.length - 1; index++) {
-        const direction = directions[index];
+        console.log(index, action);
 
-        if (direction) {
-          directionsConcat = directionsConcat.concat(`${index}`).concat("=>");
-          effectByDirection[index]({ id, speed });
+        if (action) {
+          effectByAction[index]({ id, speed });
+        } else {
+          if (noEffectByAction[index]) noEffectByAction[index]({ id, speed });
         }
       }
     }

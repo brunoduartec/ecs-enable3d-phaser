@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { defineSystem, defineQuery } from "bitecs";
+import { THREE } from "@enable3d/phaser-extension";
 
 import { ComponentFactory } from "../components/ComponentFactory";
 
@@ -10,10 +11,9 @@ const Velocity = ComponentFactory.getInstance().getProduct("Velocity");
 const Input = ComponentFactory.getInstance().getProduct("Input");
 const Target = ComponentFactory.getInstance().getProduct("Target");
 
-import { Direction } from "../components/Input";
-import { Vector2, Vector3 } from "three";
+import { Action } from "../components/Input";
+
 import { ModelFactory } from "../ModelFactory";
-import { ExtendedObject3D } from "@enable3d/phaser-extension";
 
 export default function createNPCSystem(scene: Phaser.Scene) {
   const npcQuery = defineQuery([NPC, Velocity, Rotation, Input]);
@@ -28,10 +28,11 @@ export default function createNPCSystem(scene: Phaser.Scene) {
       NPC.accumulatedTime[id] += dt;
 
       if (Target.x[id]) {
-        let playerPosition = new Vector2(Target.x[id], Target.z[id]);
-        let npcPosition = new Vector2(Position.x[id], Position.z[id]);
+        let playerPosition = new THREE.Vector2(Target.x[id], Target.z[id]);
+        let npcPosition = new THREE.Vector2(Position.x[id], Position.z[id]);
 
-        let playerDirectionVector: Vector2 = playerPosition.sub(npcPosition);
+        let playerDirectionVector: THREE.Vector2 =
+          playerPosition.sub(npcPosition);
         const model = ModelFactory.getInstance().getModel(id);
 
         // model?.lookAt(playerPosition);s
@@ -41,16 +42,18 @@ export default function createNPCSystem(scene: Phaser.Scene) {
           continue;
         }
 
-        const rotation = model.getWorldDirection(model.rotation.toVector3());
+        const rotation = model.getWorldDirection(
+          new THREE.Vector3()?.setFromEuler?.(model.rotation)
+        );
         const theta = Math.atan2(rotation.x, rotation.z);
 
-        const npcForwardVector = new Vector3(
+        const npcForwardVector = new THREE.Vector3(
           Math.sin(theta),
           model.body.position.y,
           Math.cos(theta)
         );
 
-        const npcForwardVectorProjection = new Vector2(
+        const npcForwardVectorProjection = new THREE.Vector2(
           npcForwardVector.x,
           npcForwardVector.z
         );
@@ -59,12 +62,12 @@ export default function createNPCSystem(scene: Phaser.Scene) {
 
         if (cross < 0) {
           Input.intensity[id] = 0.3;
-          Input.direction[id][Direction.Left] = true;
-          Input.direction[id][Direction.Up] = true;
+          Input.action[id][Action.Left] = true;
+          Input.action[id][Action.Up] = true;
         } else {
           Input.intensity[id] = 0.3;
-          Input.direction[id][Direction.Right] = true;
-          Input.direction[id][Direction.Up] = true;
+          Input.action[id][Action.Right] = true;
+          Input.action[id][Action.Up] = true;
         }
       } else {
         if (NPC.accumulatedTime[id] < NPC.timeBetweenActions[id]) {
@@ -80,54 +83,54 @@ export default function createNPCSystem(scene: Phaser.Scene) {
           // left
           case 0: {
             // console.log("UpLeft")
-            Input.direction[id][Direction.Up] = false;
-            Input.direction[id][Direction.Down] = false;
-            Input.direction[id][Direction.Left] = true;
-            Input.direction[id][Direction.Right] = false;
-            Input.direction[id][Direction.None] = false;
+            Input.action[id][Action.Up] = false;
+            Input.action[id][Action.Down] = false;
+            Input.action[id][Action.Left] = true;
+            Input.action[id][Action.Right] = false;
+            Input.action[id][Action.None] = false;
             break;
           }
 
           // right
           case 1: {
             // console.log("UpRight")
-            Input.direction[id][Direction.Up] = false;
-            Input.direction[id][Direction.Down] = false;
-            Input.direction[id][Direction.Left] = false;
-            Input.direction[id][Direction.Right] = true;
-            Input.direction[id][Direction.None] = false;
+            Input.action[id][Action.Up] = false;
+            Input.action[id][Action.Down] = false;
+            Input.action[id][Action.Left] = false;
+            Input.action[id][Action.Right] = true;
+            Input.action[id][Action.None] = false;
             break;
           }
 
           // up
           case 2: {
             // console.log("Up")
-            Input.direction[id][Direction.Up] = true;
-            Input.direction[id][Direction.Down] = false;
-            Input.direction[id][Direction.Left] = false;
-            Input.direction[id][Direction.Right] = false;
-            Input.direction[id][Direction.None] = false;
+            Input.action[id][Action.Up] = true;
+            Input.action[id][Action.Down] = false;
+            Input.action[id][Action.Left] = false;
+            Input.action[id][Action.Right] = false;
+            Input.action[id][Action.None] = false;
             break;
           }
 
           // down
           case 3: {
             // console.log("Down")
-            Input.direction[id][Direction.Up] = false;
-            Input.direction[id][Direction.Down] = true;
-            Input.direction[id][Direction.Left] = false;
-            Input.direction[id][Direction.Right] = false;
-            Input.direction[id][Direction.None] = false;
+            Input.action[id][Action.Up] = false;
+            Input.action[id][Action.Down] = true;
+            Input.action[id][Action.Left] = false;
+            Input.action[id][Action.Right] = false;
+            Input.action[id][Action.None] = false;
             break;
           }
 
           default: {
             // console.log("None")
-            Input.direction[id][Direction.Up] = false;
-            Input.direction[id][Direction.Down] = false;
-            Input.direction[id][Direction.Left] = false;
-            Input.direction[id][Direction.Right] = false;
-            Input.direction[id][Direction.None] = true;
+            Input.action[id][Action.Up] = false;
+            Input.action[id][Action.Down] = false;
+            Input.action[id][Action.Left] = false;
+            Input.action[id][Action.Right] = false;
+            Input.action[id][Action.None] = true;
             break;
           }
         }

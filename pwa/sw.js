@@ -5,4 +5,7 @@
  * It uses the InjectManifest function from 'workbox-webpack-plugin' inside
  * webpack/webpack.common.js
  */
-workbox.precaching.precacheAndRoute(__precacheManifest)
+import { precacheAndRoute } from "workbox-precaching";
+
+// Use with precache injection
+// precacheAndRoute(self.__WB_MANIFEST);

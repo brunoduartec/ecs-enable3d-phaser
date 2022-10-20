@@ -15,7 +15,7 @@ const AvoidDropComponent =
 
 const ViewComponent = ComponentFactory.getInstance().getProduct("View");
 
-import { ModelTypes } from "../components/Model";
+import { ModelTypeFactory } from "../models/ModelTypeFactory";
 
 interface NPCProps {
   width: number;
@@ -42,7 +42,8 @@ class NPC implements IEntity {
     RotationComponent.speed[npc] = 1;
 
     addComponent(world, ModelComponent, npc);
-    ModelComponent.modelType[npc] = ModelTypes.sphere;
+    ModelComponent.modelType[npc] =
+      ModelTypeFactory.getInstance().getModelId("sphere");
 
     addComponent(world, NPCComponent, npc);
     NPCComponent.timeBetweenActions[npc] = 500; //Phaser.Math.Between(0, 500);
@@ -64,6 +65,8 @@ class NPC implements IEntity {
     ViewComponent.length[npc] = 30;
     ViewComponent.fov[npc] = 10;
     ViewComponent.viewedList[npc] = [-1, -1, -1, -1, -1];
+
+    return npc;
   }
 }
 

@@ -1,4 +1,8 @@
-import { ExtendedObject3D, Scene3D, THREE } from "@enable3d/phaser-extension";
+import {
+  Scene3D,
+  THREE,
+  ThirdPersonControls,
+} from "@enable3d/phaser-extension";
 
 import { createWorld } from "bitecs";
 
@@ -6,8 +10,14 @@ import type { IWorld } from "bitecs";
 
 import { EntityFactory } from "../entities/Entityfactory";
 import { SystemHandler } from "../systems/SystemsHandler";
-import { Object3D, Vector3 } from "three";
+import { Vector3 } from "three";
 import { ModelFactory } from "../ModelFactory";
+import Position from "../components/Position";
+import { ModelTypeFactory } from "../models/ModelTypeFactory";
+import { BasicModel } from "../models/BasicModel";
+import { GLModel } from "../models/glModel";
+import { BookModel } from "../models/BookModel";
+import { PlayerModel } from "../models/PlayerModel";
 
 export default class MainScene extends Scene3D {
   private world!: IWorld;
@@ -21,53 +31,95 @@ export default class MainScene extends Scene3D {
 
   init() {
     this.accessThirdDimension();
-    // this.third.renderer.outputEncoding = THREE.LinearEncoding;
+  }
+
+  async preload() {
+    await this.third.load.preload(
+      "toon_cat_free",
+      "/assets/models/toon_cat_free.glb"
+    ); // change 'plataform' for what you want
+
+    // await this.third.load.preload("book", "/assets/models/book.glb");
+    // await this.initModels();
+  }
+
+  async initModels() {
+    const boxModel = new BasicModel(this.third, {
+      modeltype: "box",
+      config: {
+        width: 1,
+        height: 1,
+      },
+    });
+    await boxModel.load();
+
+    ModelTypeFactory.getInstance().addModel("box", boxModel);
+
+    const sphereModel = new BasicModel(this.third, {
+      modeltype: "sphere",
+      config: {
+        width: 1,
+        height: 1,
+      },
+    });
+    await sphereModel.load();
+
+    ModelTypeFactory.getInstance().addModel("sphere", sphereModel);
+
+    const sceneModel = new BookModel(this.third, {
+      modelName: "/assets/models/book.glb",
+      alias: "book",
+    });
+    await sceneModel.load();
+
+    ModelTypeFactory.getInstance().addModel("book", sceneModel);
+
+    const boxManModel = new PlayerModel(this.third, {
+      modelName: "/assets/models/box_man.glb",
+      alias: "man",
+    });
+    await boxManModel.load();
+
+    ModelTypeFactory.getInstance().addModel("man", boxManModel);
+
+    const playerModel = new PlayerModel(this.third, {
+      modelName: "/assets/models/player.glb",
+      alias: "player",
+    });
+    await playerModel.load();
+
+    ModelTypeFactory.getInstance().addModel("player", playerModel);
+
+    const dragonSceneModel = new GLModel(this.third, {
+      modelName: "/assets/models/dragon_attack_aftermath.glb",
+      alias: "dragon_attack_aftermath",
+    });
+    await dragonSceneModel.load();
+
+    ModelTypeFactory.getInstance().addModel(
+      "dragon_attack_aftermath",
+      dragonSceneModel
+    );
+
+    const cat = new PlayerModel(this.third, {
+      modelName: "toon_cat_free",
+      alias: "toon_cat_free",
+    });
+    await cat.load();
+
+    ModelTypeFactory.getInstance().addModel("toon_cat_free", cat);
+
+    const wolf = new GLModel(this.third, {
+      modelName: "/assets/models/Wolf-Blender-2.82a.glb",
+      alias: "Wolf-Blender-2.82a",
+    });
+    await wolf.load();
+
+    ModelTypeFactory.getInstance().addModel("wolf", wolf);
   }
 
   async createScene() {
-    /**
-     * Medieval Fantasy Book by Pixel (https://sketchfab.com/stefan.lengyel1)
-     * https://sketchfab.com/3d-models/medieval-fantasy-book-06d5a80a04fc4c5ab552759e9a97d91a
-     * Attribution 4.0 International (CC BY 4.0)
-     */
-    let object = await this.third.load.gltf("/assets/models/book.glb");
-
-    const scene = object.scenes[0];
-
-    const book = new ExtendedObject3D();
-    book.name = "scene";
-    book.add(scene);
-    this.third.add.existing(book);
-
-    // add animations
-    // sadly only the flags animations works
-    // object.animations.forEach((anim, i) => {
-    //   book.mixer = this.third.animationMixers.create(book)
-    //   // overwrite the action to be an array of actions
-    //   book.action = []
-    //   book.action[i] = book.mixer.clipAction(anim)
-    //   book.action[i].play()
-    // })
-
-    book.traverse((child) => {
-      if (child.isMesh) {
-        console.log("Adicionou", child.name);
-        child.castShadow = child.receiveShadow = false;
-        // child.material.metalness = 0
-        // child.material.roughness = 1
-
-        if (/mesh/i.test(child.name)) {
-          this.third.physics.add.existing(child, {
-            shape: "concave",
-            mass: 0,
-            collisionFlags: 1,
-            autoCenter: false,
-          });
-          child.body.setAngularFactor(0, 0, 0);
-          child.body.setLinearFactor(0, 0, 0);
-        }
-      }
-    });
+    await ModelTypeFactory.getInstance().create("book");
   }
 
   createPlayer() {
@@ -81,8 +133,10 @@ export default class MainScene extends Scene3D {
     });
   }
 
-  createCamera(thirdCameraPosition, position: Vector3 | undefined) {
-    const cameraPosition = position || new Vector3();
+  createCamera(thirdCameraPosition, position: THREE.Vector3 | undefined) {
+    const cameraPosition = position || new THREE.Vector3();
+    const lookAt =
+      cameraPosition.add(new THREE.Vector3(10, 200, 0)) || new THREE.Vector3();
     const deltaY = 2;
     // default camera
     this.third.camera.position.set(
@@ -94,7 +148,30 @@ export default class MainScene extends Scene3D {
     // copies the position of the default camera
     followCam.position.copy(thirdCameraPosition);
 
+    this.third.camera.lookAt(lookAt);
+
     return followCam;
+  }
+
+  addPlayerCamera() {
+    const model = ModelFactory.getInstance().getModel(this.playerId);
+    this.camera = this.createCamera(
+      this.third.camera.position,
+      model?.position
+    );
+
+    this.camera.position.copy(this.third.camera.position);
+    model?.add(this.camera);
+  }
+
+  initLight(lights) {
+    const intensity = 5;
+    if (lights) {
+      lights.hemisphereLight.intensity = intensity;
+      // lights?.hemisphereLight.intensity = intensity;
+      lights.ambientLight.intensity = intensity;
+      lights.directionalLight.intensity = intensity;
+    }
   }
 
   async create() {
@@ -104,36 +181,26 @@ export default class MainScene extends Scene3D {
     // this.third.warpSpeed();
     const { lights } = await this.third.warpSpeed("-ground");
     // const { hemisphereLight, ambientLight, directionalLight } = lights;
-    const intensity = 10;
-    if (lights) {
-      lights.hemisphereLight.intensity = intensity;
-      // lights?.hemisphereLight.intensity = intensity;
-      lights.ambientLight.intensity = intensity;
-      lights.directionalLight.intensity = intensity;
-    }
 
-    this.third.physics.debug?.enable();
-    this.third.physics.debug?.mode(1);
-
-    this.world = createWorld();
-
+    this.initLight(lights);
     // enable physics debugging
+    // this.third.physics.debug?.enable();
+    // this.third.physics.debug?.mode(1);
+
     let instance = this;
 
+    await this.initModels();
     await this.createScene();
 
+    this.world = createWorld();
     const playerId = instance.createPlayer();
 
     this.playerId = playerId;
-    const model = ModelFactory.getInstance().getModel(playerId);
-    this.camera = this.createCamera(
-      this.third.camera.position,
-      model?.position
-    );
 
-    model?.add(this.camera);
+    this.addPlayerCamera();
+
     // for (let i = 0; i < 5; ++i) {
-    //   instance.createNPC(10, 10);
+    // instance.createNPC(10, 10);
     // }
 
     this.systemHandler = SystemHandler.getInstance(this);
@@ -142,14 +209,26 @@ export default class MainScene extends Scene3D {
   update() {
     if (this?.systemHandler?.updateSystems)
       this.systemHandler.updateSystems(this.world);
+    const model = ModelFactory.getInstance().getModel(this.playerId);
+    if (this.camera && model) {
+      const rotation = model.getWorldDirection(
+        new THREE.Vector3()?.setFromEuler?.(model.rotation)
+      );
+      const theta = Math.atan2(rotation.x, rotation.z);
 
-    console.log("Camera", this.camera);
-    if (this.camera) {
-      const model = ModelFactory.getInstance().getModel(this.playerId);
-      const posToFollow = model?.position || new Vector3();
+      const delta = 5;
 
-      console.log("Camera", this.camera);
-      this.camera.position.set(posToFollow.x, posToFollow.y, posToFollow.z);
+      const dx = Math.sin(theta) * delta,
+        dy = -delta * 0.5,
+        dz = Math.cos(theta) * delta;
+
+      const px = Position.x[this.playerId];
+      const py = Position.y[this.playerId];
+      const pz = Position.z[this.playerId];
+
+      // console.log("Camera", { camera: this.camera, {px,py,pz} });
+      this.third.camera.position.set(px - dx, py - dy, pz - dz);
+      this.third.camera.lookAt(px, py, pz);
       // this.third.camera.lookAt(posToFollow.x, posToFollow.y + 3, posToFollow.z);
     }
   }

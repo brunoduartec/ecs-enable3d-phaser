@@ -23,9 +23,8 @@ const Jump = ComponentFactory.getInstance().getProduct("Jump");
 const View = ComponentFactory.getInstance().getProduct("View");
 const Clicked = ComponentFactory.getInstance().getProduct("Clicked");
 
-
-import { ModelTypes } from "../components/Model";
 import { ModelFactory } from "../ModelFactory";
+import { ModelTypeFactory } from "../models/ModelTypeFactory";
 
 export default function createModelSystem(scene: Scene3D) {
   const modelQuery = defineQuery([Position, Rotation, Model]);
@@ -135,116 +134,133 @@ export default function createModelSystem(scene: Scene3D) {
       const modelId = Model.modelType[id];
       const width = Model.width[id];
       const height = Model.height[id];
-      const model = ModelTypes[modelId];
 
-      const physicBody = scene.third.physics.add[model]({
-        width: width,
-        height: height,
-        x: Position.x[id],
-        y: Position.y[id],
-        z: Position.z[id],
-      });
+      let physicBody: ExtendedObject3D | undefined;
 
-      physicBody.body.setLinearFactor(1, 1, 0);
-      physicBody.body.setAngularFactor(0, 0, 0);
+      //TODO Use PromiseAll instead of await
+      (async () => {
+        try {
+          physicBody = await ModelTypeFactory.getInstance().createById(modelId);
+          if (physicBody) {
+            // physicBody.matrix.makeScale(width, height, width);
+            physicBody.position.y = Position.y[id];
+            physicBody.position.z = Position.z[id];
+            physicBody.body.setLinearFactor(1, 1, 0);
+            physicBody.body.setAngularFactor(0, 0, 0);
 
-      physicBody.userData.eid = id;
+            physicBody.userData.eid = id;
 
-      const { hasJump } = getJumpInfo(world, id);
-      if (hasJump) {
-        addSensor(
-          scene,
-          physicBody,
-          `${physicBody.name}_sensor_jump`,
-          Position.x[id],
-          Position.y[id] - 0.5 * height,
-          Position.z[id],
-          (otherObject, event) => {
-            if (event !== "end") {
-              Jump.isGrounded[id] = 1;
-              physicBody.userData.onGround = true;
-            } else {
-              physicBody.userData.onGround = false;
-              Jump.isGrounded[id] = 0;
-            }
-          }
-        );
-      }
-
-      const { hasAvoidDrop, dropHeight } = getAvoidDropInfo(world, id);
-      if (hasAvoidDrop) {
-        const dropSensorObject = {
-          mass: 1e-8,
-          shape: "box",
-          width: 0.2,
-          height: dropHeight,
-          depth: 0.2,
-        };
-        addSensor(
-          scene,
-          physicBody,
-          `${physicBody.name}_sensor_drop`,
-          Position.x[id],
-          Position.y[id] - dropHeight * 0.6,
-          Position.z[id] + 0.8 * height,
-          (otherObject, event) => {
-            if (event !== "end") {
-              AvoidDrop.triggered[id] = 0;
-            } else {
-              AvoidDrop.triggered[id] = 1;
-            }
-          },
-          dropSensorObject
-        );
-      }
-
-      const { hasView, viewLength, fov } = getViewInfo(world, id);
-      if (hasView) {
-        const viewSensorObject = {
-          mass: 1e-8,
-          shape: "cone",
-          radius: fov,
-          height: viewLength,
-        };
-        addSensor(
-          scene,
-          physicBody,
-          `${physicBody.name}_sensor_view`,
-          Position.x[id],
-          Position.y[id],
-          Position.z[id] + viewLength / 2,
-          (otherObject, event) => {
-            const initial = -1;
-            if (otherObject?.userData) {
-              const itemToAdd = otherObject.userData.eid;
-              let alreadySeen = View.viewedList[id].includes(itemToAdd);
-
-              if (event !== "end") {
-                if (!alreadySeen) {
-                  const index = View.viewedList[id].findIndex((m) => {
-                    return m === initial;
-                  });
-                  if (index >= 0) {
-                    View.viewedList[id][index] = itemToAdd;
+            const { hasJump } = getJumpInfo(world, id);
+            if (hasJump) {
+              console.log(Model.width[id], Model.height[id]);
+              const jumpSensorObject = {
+                mass: 1e-8,
+                shape: "box",
+                width: Model.width[id],
+                height: Model.height[id],
+                depth: Model.width[id],
+              };
+              addSensor(
+                scene,
+                physicBody,
+                `${physicBody.name}_sensor_jump`,
+                0,
+                -0.5 * height,
+                0,
+                (otherObject, event) => {
+                  if (physicBody) {
+                    if (event !== "end") {
+                      Jump.isGrounded[id] = 1;
+                      physicBody.userData.onGround = true;
+                    } else {
+                      physicBody.userData.onGround = false;
+                      Jump.isGrounded[id] = 0;
+                    }
                   }
-                }
-              } else {
-                if (alreadySeen) {
-                  const hasIndex = View.viewedList[id].findIndex((m) => {
-                    return m === itemToAdd;
-                  });
-
-                  View.viewedList[id][hasIndex] = initial;
-                }
-              }
+                },
+                jumpSensorObject
+              );
             }
-          },
-          viewSensorObject,
-          true
-        );
-      }
 
-      ModelFactory.getInstance().addModel(id, physicBody);
+            const { hasAvoidDrop, dropHeight } = getAvoidDropInfo(world, id);
+            if (hasAvoidDrop) {
+              const dropSensorObject = {
+                mass: 1e-8,
+                shape: "box",
+                width: 0.2,
+                height: dropHeight,
+                depth: 0.2,
+              };
+              addSensor(
+                scene,
+                physicBody,
+                `${physicBody.name}_sensor_drop`,
+                0,
+                -dropHeight * 0.6,
+                0.8 * height,
+                (otherObject, event) => {
+                  if (event !== "end") {
+                    AvoidDrop.triggered[id] = 0;
+                  } else {
+                    AvoidDrop.triggered[id] = 1;
+                  }
+                },
+                dropSensorObject
+              );
+            }
+
+            const { hasView, viewLength, fov } = getViewInfo(world, id);
+            if (hasView) {
+              const viewSensorObject = {
+                mass: 1e-8,
+                shape: "cone",
+                radius: fov,
+                height: viewLength,
+              };
+              addSensor(
+                scene,
+                physicBody,
+                `${physicBody.name}_sensor_view`,
+                0,
+                0,
+                viewLength / 2,
+                (otherObject, event) => {
+                  const initial = -1;
+                  if (otherObject?.userData) {
+                    const itemToAdd = otherObject.userData.eid;
+                    let alreadySeen = View.viewedList[id].includes(itemToAdd);
+
+                    if (event !== "end") {
+                      if (!alreadySeen) {
+                        const index = View.viewedList[id].findIndex((m) => {
+                          return m === initial;
+                        });
+                        if (index >= 0) {
+                          View.viewedList[id][index] = itemToAdd;
+                        }
+                      }
+                    } else {
+                      if (alreadySeen) {
+                        const hasIndex = View.viewedList[id].findIndex((m) => {
+                          return m === itemToAdd;
+                        });
+
+                        View.viewedList[id][hasIndex] = initial;
+                      }
+                    }
+                  }
+                },
+                viewSensorObject,
+                true
+              );
+            }
+            console.log("Added", physicBody);
+            ModelFactory.getInstance().addModel(id, physicBody);
+          }
+        } catch (e) {
+          // Deal with the fact the chain failed
+        }
+      })();
     }
 
     const entitiesExited = modelQueryExit(world);

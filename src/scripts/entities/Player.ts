@@ -16,7 +16,7 @@ const AvoidDropComponent =
   ComponentFactory.getInstance().getProduct("AvoidDrop");
 const ViewComponent = ComponentFactory.getInstance().getProduct("View");
 
-import { ModelTypes } from "../components/Model";
+import { ModelTypeFactory } from "../models/ModelTypeFactory";
 
 class Player implements IEntity {
   constructor() {}
@@ -39,7 +39,8 @@ class Player implements IEntity {
     PositionComponent.y[player] = 10;
     PositionComponent.z[player] = 0;
 
-    ModelComponent.modelType[player] = ModelTypes.box;
+    ModelComponent.modelType[player] =
+      ModelTypeFactory.getInstance().getModelId("man");
     ModelComponent.width[player] = 1;
     ModelComponent.height[player] = 1;
     InputComponent.speed[player] = 2;
@@ -59,6 +60,7 @@ class Player implements IEntity {
     // ViewComponent.length[player] = 10;
     // ViewComponent.fov[player] = 3;
     // ViewComponent.viewedList[player] = [-1, -1, -1, -1, -1];
+    return player;
   }
 }
 

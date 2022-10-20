@@ -1,7 +1,6 @@
-import Phaser from "phaser";
-import { Scene3D } from "@enable3d/phaser-extension";
+import { Scene3D, THREE } from "@enable3d/phaser-extension";
 
-import { defineSystem, defineQuery, hasComponent, IWorld, Changed } from "bitecs";
+import { defineSystem, defineQuery, hasComponent, IWorld } from "bitecs";
 
 import { ComponentFactory } from "../components/ComponentFactory";
 
@@ -16,7 +15,6 @@ const Health = ComponentFactory.getInstance().getProduct("Health");
 const Clicked = ComponentFactory.getInstance().getProduct("Clicked");
 
 import { ModelFactory } from "../ModelFactory";
-import { Vector3 } from "three";
 
 export default function handlePhysicsSystem(scene: Scene3D) {
   const modelQuery = defineQuery([Position, Rotation, Velocity, Health, Model]);
@@ -52,9 +50,9 @@ export default function handlePhysicsSystem(scene: Scene3D) {
   }
 
   function updatePosition(id, position) {
-    Position.x[id] = position.x
-    Position.y[id] = position.y
-    Position.z[id] = position.z
+    Position.x[id] = position.x;
+    Position.y[id] = position.y;
+    Position.z[id] = position.z;
   }
 
   return defineSystem((world: IWorld) => {
@@ -68,13 +66,15 @@ export default function handlePhysicsSystem(scene: Scene3D) {
         continue;
       }
 
-      updatePosition(id, model.position)
+      updatePosition(id, model.position);
 
       const rotationX = Rotation.x[id];
       const speed = Velocity.speed[id];
 
       model.body.setAngularVelocityY(rotationX);
-      const rotation = model.getWorldDirection(model.rotation.toVector3());
+      const rotation = model.getWorldDirection(
+        new THREE.Vector3()?.setFromEuler?.(model.rotation)
+      );
       const theta = Math.atan2(rotation.x, rotation.z);
 
       const x = Math.sin(theta) * speed,
@@ -90,7 +90,7 @@ export default function handlePhysicsSystem(scene: Scene3D) {
       // Velocity.speed[id] = 0;
       // Rotation.x[id] = 0;
 
-      tryApplyJump(world, id, model)
+      tryApplyJump(world, id, model);
     }
 
     return world;

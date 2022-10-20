@@ -32,7 +32,9 @@ class ModelFactory extends Concretefactory {
     this.models.set(id, model);
   }
 
-  public;
+  public getModels() {
+    return this.models;
+  }
 
   public getModel(id: number): ExtendedObject3D | undefined {
     const model = this.models?.get(id);
