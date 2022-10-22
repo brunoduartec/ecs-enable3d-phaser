@@ -57,10 +57,13 @@ class ModelTypeFactory extends Concretefactory {
     return undefined;
   }
 
-  public async createById(id: number): Promise<ExtendedObject3D | undefined> {
+  public async createById(
+    id: number,
+    position: THREE.Vector3
+  ): Promise<ExtendedObject3D | undefined> {
     const modelTemplate = this.getModelById(id);
     try {
-      let model = await modelTemplate?.create();
+      let model = await modelTemplate?.create(position);
       if (model) {
         return model;
       }
@@ -70,10 +73,13 @@ class ModelTypeFactory extends Concretefactory {
     }
   }
 
-  public async create(alias: string): Promise<ExtendedObject3D | undefined> {
+  public async create(
+    alias: string,
+    position: THREE.Vector3
+  ): Promise<ExtendedObject3D | undefined> {
     const modelTemplate = this.models?.get(alias);
     try {
-      let model = await modelTemplate?.create();
+      let model = await modelTemplate?.create(position);
       if (model) {
         return model;
       }

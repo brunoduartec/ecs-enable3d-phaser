@@ -7,48 +7,14 @@ class PlayerModel extends GLModel {
     super(third, modelInfo);
   }
 
-  async load() {
-    const { modelName, alias } = this.modelInfo;
-    this.object = await this.third.load.gltf(modelName);
+  async create(position: THREE.Vector3): Promise<ExtendedObject3D> {
+    let cloneModel = this.clone();
 
-    const scene = this.object.scene.children[0];
+    cloneModel.position.set(position.x, position.y, position.z);
 
-    const model = new ExtendedObject3D();
-    this.model = model;
-
-    this.model.name = alias;
-    // this.model.rotateY(Math.PI + 0.1); // a hack
-    this.model.add(scene);
-
-    // this.model.rotation.set(0, Math.PI * 1.5, 0);
-    // this.man.position.set(35, -3.5, 0)
-  }
-
-  async create(): Promise<ExtendedObject3D> {
-    let cloneModel = this.model;
-
-    // this.third.add.existing(cloneModel);
-
-    // cloneModel.rotateY(Math.PI + 0.1); // a hack
-    // cloneModel.rotation.set(0, Math.PI * 1.5, 0);
-    // cloneModel.position.set(35, -3.5, 0);
-    // add shadow
     cloneModel.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = child.receiveShadow = true;
-        // this.third.physics.add.existing(child, {
-        //   shape: "concave",
-        //   mass: 0,
-        //   collisionFlags: 1,
-        //   autoCenter: false,
-        // });
-
-        // https://discourse.threejs.org/t/cant-export-material-from-blender-gltf/12258
-
-        // child.material.roughness = 1;
-        // child.material.metalness = 0;
-
-        console.log(child.material);
       }
     });
 
@@ -59,15 +25,10 @@ class PlayerModel extends GLModel {
 
     this.object.animations.forEach((animation) => {
       if (animation.name) {
-        console.log("Adiionou Animação", animation.name);
-
         cloneModel.anims.add(animation.name, animation);
       }
     });
 
-    // console.log(cloneModel.animation.get("idle"));
-
-    console.log("Anims", cloneModel.anims);
     // cloneModel.animation.play("idle");
     cloneModel.anims.play("idle");
 

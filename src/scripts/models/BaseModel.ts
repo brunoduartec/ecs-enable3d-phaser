@@ -16,7 +16,7 @@ class BaseModel implements IModel {
   setId(id: number) {
     this._id = id;
   }
-  async create(): Promise<ExtendedObject3D> {
+  async create(position: THREE.Vector3): Promise<ExtendedObject3D> {
     throw new Error("Method not implemented.");
   }
   load() {

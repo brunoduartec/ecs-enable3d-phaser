@@ -41,6 +41,7 @@ export default function handlePhysicsSystem(scene: Scene3D) {
       world,
       id
     );
+
     if (hasJump && isGrounded) {
       if (isJumping) {
         model.body.applyForceY(jumpStrength);
@@ -81,11 +82,11 @@ export default function handlePhysicsSystem(scene: Scene3D) {
         y = model.body.velocity.y,
         z = Math.cos(theta) * speed;
 
-      if (AvoidDrop.triggered[id] === 0) {
-        model.body.setVelocity(x, y, z);
-      } else {
-        model.body.setVelocity(0, 0, 0);
-      }
+      // if (AvoidDrop.triggered[id] === 0) {
+      model.body.setVelocity(x, y, z);
+      // } else {
+      //   model.body.setVelocity(0, 0, 0);
+      // }
 
       // Velocity.speed[id] = 0;
       // Rotation.x[id] = 0;

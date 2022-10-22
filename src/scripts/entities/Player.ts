@@ -35,12 +35,12 @@ class Player implements IEntity {
     addComponent(world, AvoidDropComponent, player);
     addComponent(world, ViewComponent, player);
 
-    PositionComponent.x[player] = 1;
+    PositionComponent.x[player] = 0;
     PositionComponent.y[player] = 10;
     PositionComponent.z[player] = 0;
 
     ModelComponent.modelType[player] =
-      ModelTypeFactory.getInstance().getModelId("man");
+      ModelTypeFactory.getInstance().getModelId("character");
     ModelComponent.width[player] = 1;
     ModelComponent.height[player] = 1;
     InputComponent.speed[player] = 2;
@@ -51,7 +51,7 @@ class Player implements IEntity {
 
     HealthComponent.amount[player] = 100;
 
-    AvoidDropComponent.height[player] = 10;
+    // AvoidDropComponent.height[player] = 10;
 
     RotationComponent.speed[player] = 1;
 

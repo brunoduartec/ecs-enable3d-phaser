@@ -1,5 +1,4 @@
-import Phaser from "phaser";
-import { Scene3D } from "@enable3d/phaser-extension";
+import { Scene3D, THREE } from "@enable3d/phaser-extension";
 
 import { ExtendedObject3D } from "@enable3d/common/dist/extendedObject3D";
 
@@ -114,7 +113,7 @@ export default function createModelSystem(scene: Scene3D) {
     sensor.body.setCollisionFlags(4);
     sensor.castShadow = sensor.receiveShadow = false;
 
-    // connect sensor to robot
+    // connect sensor to entity
     scene.third.physics.add.constraints.lock(item.body, sensor.body);
 
     sensor.body.on.collision((otherObject, event) => {
@@ -140,11 +139,18 @@ export default function createModelSystem(scene: Scene3D) {
       //TODO Use PromiseAll instead of await
       (async () => {
         try {
-          physicBody = await ModelTypeFactory.getInstance().createById(modelId);
+          const positionVector = new THREE.Vector3(
+            Position.x[id],
+            Position.y[id],
+            Position.z[id]
+          );
+
+          physicBody = await ModelTypeFactory.getInstance().createById(
+            modelId,
+            positionVector
+          );
+
           if (physicBody) {
-            // physicBody.matrix.makeScale(width, height, width);
-            physicBody.position.y = Position.y[id];
-            physicBody.position.z = Position.z[id];
             physicBody.body.setLinearFactor(1, 1, 0);
             physicBody.body.setAngularFactor(0, 0, 0);
 
@@ -152,28 +158,27 @@ export default function createModelSystem(scene: Scene3D) {
 
             const { hasJump } = getJumpInfo(world, id);
             if (hasJump) {
-              console.log(Model.width[id], Model.height[id]);
               const jumpSensorObject = {
                 mass: 1e-8,
                 shape: "box",
                 width: Model.width[id],
-                height: Model.height[id],
+                height: 0.3,
                 depth: Model.width[id],
               };
               addSensor(
                 scene,
                 physicBody,
-                `${physicBody.name}_sensor_jump`,
+                `sensor-${physicBody.name}_jump`,
                 0,
-                -0.5 * height,
+                0,
                 0,
                 (otherObject, event) => {
                   if (physicBody) {
+                    if (/sensor/.test(otherObject.name)) {
+                    }
                     if (event !== "end") {
                       Jump.isGrounded[id] = 1;
-                      physicBody.userData.onGround = true;
                     } else {
-                      physicBody.userData.onGround = false;
                       Jump.isGrounded[id] = 0;
                     }
                   }
@@ -194,9 +199,9 @@ export default function createModelSystem(scene: Scene3D) {
               addSensor(
                 scene,
                 physicBody,
-                `${physicBody.name}_sensor_drop`,
+                `sensor-${physicBody.name}_drop`,
                 0,
-                -dropHeight * 0.6,
+                -dropHeight * 0.5,
                 0.8 * height,
                 (otherObject, event) => {
                   if (event !== "end") {
@@ -254,7 +259,6 @@ export default function createModelSystem(scene: Scene3D) {
                 true
               );
             }
-            console.log("Added", physicBody);
             ModelFactory.getInstance().addModel(id, physicBody);
           }
         } catch (e) {

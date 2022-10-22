@@ -82,7 +82,6 @@ export default function createNPCSystem(scene: Phaser.Scene) {
         switch (randomMoviment) {
           // left
           case 0: {
-            // console.log("UpLeft")
             Input.action[id][Action.Up] = false;
             Input.action[id][Action.Down] = false;
             Input.action[id][Action.Left] = true;
@@ -93,7 +92,6 @@ export default function createNPCSystem(scene: Phaser.Scene) {
 
           // right
           case 1: {
-            // console.log("UpRight")
             Input.action[id][Action.Up] = false;
             Input.action[id][Action.Down] = false;
             Input.action[id][Action.Left] = false;
@@ -104,7 +102,6 @@ export default function createNPCSystem(scene: Phaser.Scene) {
 
           // up
           case 2: {
-            // console.log("Up")
             Input.action[id][Action.Up] = true;
             Input.action[id][Action.Down] = false;
             Input.action[id][Action.Left] = false;
@@ -115,7 +112,6 @@ export default function createNPCSystem(scene: Phaser.Scene) {
 
           // down
           case 3: {
-            // console.log("Down")
             Input.action[id][Action.Up] = false;
             Input.action[id][Action.Down] = true;
             Input.action[id][Action.Left] = false;
@@ -125,7 +121,6 @@ export default function createNPCSystem(scene: Phaser.Scene) {
           }
 
           default: {
-            // console.log("None")
             Input.action[id][Action.Up] = false;
             Input.action[id][Action.Down] = false;
             Input.action[id][Action.Left] = false;

@@ -24,9 +24,12 @@ export default class MainScene extends Scene3D {
   private systemHandler!: SystemHandler;
   private playerId: number;
   private camera: THREE.Object3D;
+  private usePlayerCamera: boolean;
 
   constructor() {
     super({ key: "MainScene" });
+
+    this.usePlayerCamera = false;
   }
 
   init() {
@@ -34,10 +37,7 @@ export default class MainScene extends Scene3D {
   }
 
   async preload() {
-    await this.third.load.preload(
-      "toon_cat_free",
-      "/assets/models/toon_cat_free.glb"
-    ); // change 'plataform' for what you want
+    await this.third.load.preload("book", "/assets/models/book.glb"); // change 'plataform' for what you want
 
     // await this.third.load.preload("book", "/assets/models/book.glb");
     // await this.initModels();
@@ -66,60 +66,57 @@ export default class MainScene extends Scene3D {
 
     ModelTypeFactory.getInstance().addModel("sphere", sphereModel);
 
-    const sceneModel = new BookModel(this.third, {
-      modelName: "/assets/models/book.glb",
-      alias: "book",
-    });
-    await sceneModel.load();
+    // const sceneModel = new BookModel(this.third, {
+    //   modelName: "/assets/models/book.glb",
+    //   alias: "book",
+    // });
+    // await sceneModel.load();
 
-    ModelTypeFactory.getInstance().addModel("book", sceneModel);
+    // ModelTypeFactory.getInstance().addModel("book", sceneModel);
 
     const boxManModel = new PlayerModel(this.third, {
-      modelName: "/assets/models/box_man.glb",
-      alias: "man",
+      modelName: "/assets/models/Character.gltf",
+      alias: "character",
     });
     await boxManModel.load();
 
-    ModelTypeFactory.getInstance().addModel("man", boxManModel);
+    ModelTypeFactory.getInstance().addModel("character", boxManModel);
 
-    const playerModel = new PlayerModel(this.third, {
-      modelName: "/assets/models/player.glb",
-      alias: "player",
+    const EnemyModel = new PlayerModel(this.third, {
+      modelName: "/assets/models/Enemy.gltf",
+      alias: "enemy",
     });
-    await playerModel.load();
+    await EnemyModel.load();
 
-    ModelTypeFactory.getInstance().addModel("player", playerModel);
-
-    const dragonSceneModel = new GLModel(this.third, {
-      modelName: "/assets/models/dragon_attack_aftermath.glb",
-      alias: "dragon_attack_aftermath",
-    });
-    await dragonSceneModel.load();
-
-    ModelTypeFactory.getInstance().addModel(
-      "dragon_attack_aftermath",
-      dragonSceneModel
-    );
-
-    const cat = new PlayerModel(this.third, {
-      modelName: "toon_cat_free",
-      alias: "toon_cat_free",
-    });
-    await cat.load();
-
-    ModelTypeFactory.getInstance().addModel("toon_cat_free", cat);
-
-    const wolf = new GLModel(this.third, {
-      modelName: "/assets/models/Wolf-Blender-2.82a.glb",
-      alias: "Wolf-Blender-2.82a",
-    });
-    await wolf.load();
-
-    ModelTypeFactory.getInstance().addModel("wolf", wolf);
+    ModelTypeFactory.getInstance().addModel("enemy", EnemyModel);
   }
 
   async createScene() {
-    await ModelTypeFactory.getInstance().create("book");
+    // await ModelTypeFactory.getInstance().create("book");
+    // const plane = new THREE.Mesh(
+    //   new THREE.PlaneGeometry(10, 20, 10, 10),
+
+    // );
+
+    // const geometry = new THREE.PlaneGeometry(5, 5, 1, 1);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x1e601c,
+    });
+
+    const plane = this.third.add.plane(
+      {
+        width: 5000,
+        height: 5000,
+      },
+      material
+    );
+
+    plane.castShadow = false;
+    plane.receiveShadow = true;
+    plane.rotation.x = -Math.PI / 2;
+
+    this.third.add.existing(plane);
+    this.third.physics.add.existing(plane, { shape: "convexMesh", mass: 0 }); // see https://github.com/enable3d/enable3d/issues/75
   }
 
   createPlayer() {
@@ -164,51 +161,7 @@ export default class MainScene extends Scene3D {
     model?.add(this.camera);
   }
 
-  initLight(lights) {
-    const intensity = 5;
-    if (lights) {
-      lights.hemisphereLight.intensity = intensity;
-      // lights?.hemisphereLight.intensity = intensity;
-      lights.ambientLight.intensity = intensity;
-      lights.directionalLight.intensity = intensity;
-    }
-  }
-
-  async create() {
-    const { width, height } = this.scale;
-
-    // creates a nice scene
-    // this.third.warpSpeed();
-    const { lights } = await this.third.warpSpeed("-ground");
-    // const { hemisphereLight, ambientLight, directionalLight } = lights;
-
-    this.initLight(lights);
-    // enable physics debugging
-    // this.third.physics.debug?.enable();
-    // this.third.physics.debug?.mode(1);
-
-    let instance = this;
-
-    await this.initModels();
-    await this.createScene();
-
-    this.world = createWorld();
-    const playerId = instance.createPlayer();
-
-    this.playerId = playerId;
-
-    this.addPlayerCamera();
-
-    // for (let i = 0; i < 5; ++i) {
-    // instance.createNPC(10, 10);
-    // }
-
-    this.systemHandler = SystemHandler.getInstance(this);
-  }
-
-  update() {
-    if (this?.systemHandler?.updateSystems)
-      this.systemHandler.updateSystems(this.world);
+  updatePlayerCamera() {
     const model = ModelFactory.getInstance().getModel(this.playerId);
     if (this.camera && model) {
       const rotation = model.getWorldDirection(
@@ -226,10 +179,120 @@ export default class MainScene extends Scene3D {
       const py = Position.y[this.playerId];
       const pz = Position.z[this.playerId];
 
-      // console.log("Camera", { camera: this.camera, {px,py,pz} });
       this.third.camera.position.set(px - dx, py - dy, pz - dz);
       this.third.camera.lookAt(px, py, pz);
       // this.third.camera.lookAt(posToFollow.x, posToFollow.y + 3, posToFollow.z);
+    }
+  }
+
+  _LoadSky() {
+    const _VS = `
+varying vec3 vWorldPosition;
+
+void main() {
+  vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+  vWorldPosition = worldPosition.xyz;
+
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}`;
+
+    const _FS = `
+uniform vec3 topColor;
+uniform vec3 bottomColor;
+uniform float offset;
+uniform float exponent;
+
+varying vec3 vWorldPosition;
+
+void main() {
+  float h = normalize( vWorldPosition + offset ).y;
+  gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
+}`;
+
+    let hemisphereColor = new THREE.Color(0.6, 1, 0.6);
+
+    this.third.lights.hemisphereLight({
+      intensity: 0.2,
+      skyColor: hemisphereColor,
+    });
+
+    const uniforms = {
+      topColor: { value: new THREE.Color(0x0077ff) },
+      bottomColor: { value: new THREE.Color(0xffffff) },
+      offset: { value: 33 },
+      exponent: { value: 0.6 },
+    };
+    uniforms["topColor"].value.copy(hemisphereColor);
+
+    // this.third.fo
+
+    // this._scene.fog.color.copy(uniforms["bottomColor"].value);
+
+    const skyGeo = new THREE.BufferGeometry();
+    const skyMat = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: _VS,
+      fragmentShader: _FS,
+      side: THREE.BackSide,
+    });
+
+    const sky = new THREE.Mesh(skyGeo, skyMat);
+    this.third.add.mesh(sky);
+  }
+
+  initLight(lights) {
+    const intensity = 5;
+    if (lights) {
+      lights.hemisphereLight.intensity = intensity;
+      // lights?.hemisphereLight.intensity = intensity;
+      lights.ambientLight.intensity = intensity;
+      lights.directionalLight.intensity = intensity;
+    }
+  }
+
+  async create() {
+    const { width, height } = this.scale;
+
+    // creates a nice scene
+    // this.third.warpSpeed();
+
+    // this.third.haveSomeFun();
+    const { lights } = await this.third.warpSpeed("-ground");
+    // const { hemisphereLight, ambientLight, directionalLight } = lights;
+
+    // this.initLight(lights);
+    this._LoadSky();
+    // enable physics debugging
+    this.third.physics.debug?.enable();
+    this.third.physics.debug?.mode(1);
+
+    let instance = this;
+
+    await this.initModels();
+    await this.createScene();
+
+    this.world = createWorld();
+    const playerId = instance.createPlayer();
+
+    this.playerId = playerId;
+
+    if (this.usePlayerCamera) {
+      this.addPlayerCamera();
+    }
+
+    for (let i = 0; i < 25; ++i) {
+      instance.createNPC(10, 10);
+    }
+
+    this.systemHandler = SystemHandler.getInstance(this);
+  }
+
+  update() {
+    if (this?.systemHandler?.updateSystems)
+      this.systemHandler.updateSystems(this.world);
+
+    if (this.usePlayerCamera) {
+      this.updatePlayerCamera();
     }
   }
 }

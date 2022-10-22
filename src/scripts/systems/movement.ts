@@ -24,7 +24,6 @@ const effectByAction = {
     Rotation.x[id] = Rotation.speed[id] * Input.intensity[id];
   },
   [Action.Jump]: function ({ id }) {
-    console.log("Jump");
     Jump.isJumping[id] = 1;
   },
   [Action.None]: function ({ id }) {
@@ -55,8 +54,6 @@ export default function createMovementSystem() {
 
       for (let index = 0; index < actions.length - 1; index++) {
         const action = actions[index];
-
-        console.log(index, action);
 
         if (action) {
           effectByAction[index]({ id, speed });

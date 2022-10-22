@@ -8,13 +8,8 @@ class BookModel extends GLModel {
   }
 
   async create(): Promise<ExtendedObject3D> {
-    let cloneModel = this.model.clone();
-
-    // this.third.add.existing(cloneModel);
-
-    this.third.add.existing(cloneModel, {
-      standard: { metalness: 0, roughness: 1 },
-    });
+    const cloneModel = this.clone();
+    this.third.add.existing(cloneModel);
 
     this.object.animations.forEach((anim, i) => {
       let mixer = this.third.animationMixers.create(cloneModel);
@@ -29,7 +24,6 @@ class BookModel extends GLModel {
         // child.material.roughness = 1;
 
         if (/mesh/i.test(child.name)) {
-          console.log(child.name);
           this.third.physics.add.existing(child, {
             shape: "concave",
             mass: 0,
@@ -38,10 +32,6 @@ class BookModel extends GLModel {
           });
           child.body.setAngularFactor(0, 0, 0);
           child.body.setLinearFactor(0, 0, 0);
-
-          this.third.add.material({
-            standard: { roughness: 0.4, metalness: 1 },
-          });
         }
       }
     });

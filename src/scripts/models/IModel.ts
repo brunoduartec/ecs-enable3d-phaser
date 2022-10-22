@@ -3,7 +3,7 @@ import Third from "@enable3d/phaser-extension/dist/third";
 
 export interface IModel {
   load();
-  create(): Promise<ExtendedObject3D>;
+  create(position: THREE.Vector3): Promise<ExtendedObject3D>;
   get();
   setId(id: number);
   getId(): number;

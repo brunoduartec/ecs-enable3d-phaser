@@ -1,6 +1,7 @@
 import { ExtendedObject3D } from "@enable3d/phaser-extension";
 import Third from "@enable3d/phaser-extension/dist/third";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import { BaseModel } from "./BaseModel";
 
 export interface GLModelInfo {
@@ -21,16 +22,20 @@ class GLModel extends BaseModel {
     this.object = await this.third.load.gltf(modelName);
 
     const scene = this.object.scenes[0];
+  }
+  clone(): ExtendedObject3D {
+    let scene = SkeletonUtils.clone(this.object.scene);
 
-    const model = new ExtendedObject3D();
-    model.name = alias;
-    model.add(scene);
+    const cloneModel = new ExtendedObject3D();
+    cloneModel.add(scene);
 
-    this.model = model;
+    return cloneModel;
   }
 
-  async create(): Promise<ExtendedObject3D> {
-    let cloneModel = this.model.clone();
+  async create(position: THREE.Vector3): Promise<ExtendedObject3D> {
+    const cloneModel = this.clone();
+
+    cloneModel.position.set(position.x, position.y, position.z);
 
     this.third.add.existing(cloneModel);
 
@@ -44,8 +49,6 @@ class GLModel extends BaseModel {
         });
       }
     });
-
-    this.third.add.existing(cloneModel);
 
     return cloneModel;
   }

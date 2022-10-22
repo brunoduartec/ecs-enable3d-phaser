@@ -27,15 +27,9 @@ class NPC implements IEntity {
     const npc = addEntity(world);
 
     addComponent(world, PositionComponent, npc);
-    PositionComponent.x[npc] = Phaser.Math.Between(
-      -props.width * 0.25,
-      props.width * 0.75
-    );
-    PositionComponent.y[npc] = 0;
-    PositionComponent.z[npc] = Phaser.Math.Between(
-      -props.height * 0.25,
-      props.height * 0.75
-    );
+    PositionComponent.x[npc] = Phaser.Math.Between(-props.width, props.width);
+    PositionComponent.y[npc] = 100;
+    PositionComponent.z[npc] = Phaser.Math.Between(-props.height, props.height);
 
     addComponent(world, VelocityComponent, npc);
     addComponent(world, RotationComponent, npc);
@@ -43,7 +37,7 @@ class NPC implements IEntity {
 
     addComponent(world, ModelComponent, npc);
     ModelComponent.modelType[npc] =
-      ModelTypeFactory.getInstance().getModelId("sphere");
+      ModelTypeFactory.getInstance().getModelId("enemy");
 
     addComponent(world, NPCComponent, npc);
     NPCComponent.timeBetweenActions[npc] = 500; //Phaser.Math.Between(0, 500);
@@ -61,10 +55,10 @@ class NPC implements IEntity {
     // addComponent(world, Clicked, npc);
     // Clicked.check[npc] = 0;
 
-    addComponent(world, ViewComponent, npc);
-    ViewComponent.length[npc] = 30;
-    ViewComponent.fov[npc] = 10;
-    ViewComponent.viewedList[npc] = [-1, -1, -1, -1, -1];
+    // addComponent(world, ViewComponent, npc);
+    // ViewComponent.length[npc] = 30;
+    // ViewComponent.fov[npc] = 10;
+    // ViewComponent.viewedList[npc] = [-1, -1, -1, -1, -1];
 
     return npc;
   }
