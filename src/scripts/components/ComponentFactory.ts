@@ -13,8 +13,9 @@ import Health from "./Health";
 import AvoidDrop from "./AvoidDrop";
 import View from "./View";
 import Target from "./Target";
-import list from "./component-list.json"
+import ThirdPersonCamera from "./ThirdPersonCamera";
 
+import list from "./component-list.json";
 
 class ComponentFactory extends Concretefactory {
   private static instance: ComponentFactory;
@@ -38,6 +39,7 @@ class ComponentFactory extends Concretefactory {
     this.addProduct("AvoidDrop", AvoidDrop);
     this.addProduct("View", View);
     this.addProduct("Target", Target);
+    this.addProduct("ThirdPersonCamera", ThirdPersonCamera);
   }
 
   /**

@@ -8,6 +8,7 @@ import createNPCSystem from "./npc";
 import chasePlayerSystem from "./chaseplayer";
 import handlePhysicsSystem from "./physics";
 import handleAnimationSystem from "./animation";
+import handleThirdPersonCamera from "./thirdpersoncamera";
 
 class SystemHandler {
   private static instance: SystemHandler;
@@ -37,6 +38,7 @@ class SystemHandler {
     this.systems.push(checkLifeSystem());
     this.systems.push(handlePhysicsSystem(scene));
     this.systems.push(handleAnimationSystem());
+    this.systems.push(handleThirdPersonCamera(scene, 0));
   }
 
   /**
@@ -53,10 +55,10 @@ class SystemHandler {
     return SystemHandler.instance;
   }
 
-  public updateSystems(world: IWorld) {
+  public updateSystems(world: IWorld, deltaTime: number) {
     for (let index = 0; index < this.systems.length; index++) {
       const system = this.systems[index];
-      system(world);
+      system(world, deltaTime);
     }
   }
 }

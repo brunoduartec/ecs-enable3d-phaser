@@ -56,6 +56,12 @@ export default function handlePhysicsSystem(scene: Scene3D) {
     Position.z[id] = position.z;
   }
 
+  function updateRotation(id: number, rotation: THREE.Euler) {
+    Rotation.x[id] = rotation.x;
+    Rotation.y[id] = rotation.y;
+    Rotation.z[id] = rotation.z;
+  }
+
   return defineSystem((world: IWorld) => {
     const entities = modelQuery(world);
     for (let i = 0; i < entities.length; ++i) {
@@ -69,15 +75,16 @@ export default function handlePhysicsSystem(scene: Scene3D) {
 
       updatePosition(id, model.position);
 
-      const rotationX = Rotation.x[id];
+      const rotationY = Rotation.y[id];
       const speed = Velocity.speed[id];
 
-      model.body.setAngularVelocityY(rotationX);
+      model.body.setAngularVelocityY(rotationY);
       const rotation = model.getWorldDirection(
         new THREE.Vector3()?.setFromEuler?.(model.rotation)
       );
       const theta = Math.atan2(rotation.x, rotation.z);
 
+      updateRotation(id, model.rotation);
       const x = Math.sin(theta) * speed,
         y = model.body.velocity.y,
         z = Math.cos(theta) * speed;

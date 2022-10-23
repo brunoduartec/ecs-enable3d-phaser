@@ -1,4 +1,4 @@
-import { ExtendedObject3D } from "@enable3d/phaser-extension";
+import { ExtendedObject3D, THREE } from "@enable3d/phaser-extension";
 import { Concretefactory } from "../ConcreteFactory";
 import { IModel } from "./IModel";
 
@@ -75,7 +75,7 @@ class ModelTypeFactory extends Concretefactory {
 
   public async create(
     alias: string,
-    position: THREE.Vector3
+    position: THREE.Vector3 = new THREE.Vector3()
   ): Promise<ExtendedObject3D | undefined> {
     const modelTemplate = this.models?.get(alias);
     try {

@@ -27,7 +27,9 @@ class GLModel extends BaseModel {
     let scene = SkeletonUtils.clone(this.object.scene);
 
     const cloneModel = new ExtendedObject3D();
+    cloneModel.frustumCulled = true;
     cloneModel.add(scene);
+    cloneModel.castShadow = cloneModel.receiveShadow = false;
 
     return cloneModel;
   }

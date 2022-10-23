@@ -9,6 +9,9 @@ class BookModel extends GLModel {
 
   async create(): Promise<ExtendedObject3D> {
     const cloneModel = this.clone();
+
+    cloneModel.scale.set(2, 2, 2);
+    cloneModel.castShadow = false;
     this.third.add.existing(cloneModel);
 
     this.object.animations.forEach((anim, i) => {
@@ -20,6 +23,7 @@ class BookModel extends GLModel {
       if (child.isMesh) {
         child.castShadow = child.receiveShadow = false;
 
+        // child.material = new Material()
         // child.material.metalness = 0;
         // child.material.roughness = 1;
 

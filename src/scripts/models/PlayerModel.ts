@@ -12,11 +12,11 @@ class PlayerModel extends GLModel {
 
     cloneModel.position.set(position.x, position.y, position.z);
 
-    cloneModel.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = child.receiveShadow = true;
-      }
-    });
+    // cloneModel.traverse((child) => {
+    //   if (child.isMesh) {
+    //     child.castShadow = child.receiveShadow = true;
+    //   }
+    // });
 
     /**
      * Animations

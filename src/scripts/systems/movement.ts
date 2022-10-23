@@ -18,16 +18,16 @@ const effectByAction = {
     Velocity.speed[id] = -speed;
   },
   [Action.Right]: function ({ id }) {
-    Rotation.x[id] = -Rotation.speed[id] * Input.intensity[id];
+    Rotation.y[id] = -Rotation.speed[id] * Input.intensity[id];
   },
   [Action.Left]: function ({ id }) {
-    Rotation.x[id] = Rotation.speed[id] * Input.intensity[id];
+    Rotation.y[id] = Rotation.speed[id] * Input.intensity[id];
   },
   [Action.Jump]: function ({ id }) {
     Jump.isJumping[id] = 1;
   },
   [Action.None]: function ({ id }) {
-    Rotation.x[id] = 0;
+    Rotation.y[id] = 0;
     Velocity.speed[id] = 0;
   },
 };

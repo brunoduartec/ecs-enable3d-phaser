@@ -1,8 +1,4 @@
-import {
-  Scene3D,
-  THREE,
-  ThirdPersonControls,
-} from "@enable3d/phaser-extension";
+import { Scene3D, THREE } from "@enable3d/phaser-extension";
 
 import { createWorld } from "bitecs";
 
@@ -10,14 +6,12 @@ import type { IWorld } from "bitecs";
 
 import { EntityFactory } from "../entities/Entityfactory";
 import { SystemHandler } from "../systems/SystemsHandler";
-import { Vector3 } from "three";
 import { ModelFactory } from "../ModelFactory";
 import Position from "../components/Position";
 import { ModelTypeFactory } from "../models/ModelTypeFactory";
 import { BasicModel } from "../models/BasicModel";
-import { GLModel } from "../models/glModel";
-import { BookModel } from "../models/BookModel";
 import { PlayerModel } from "../models/PlayerModel";
+import { BookModel } from "../models/BookModel";
 
 export default class MainScene extends Scene3D {
   private world!: IWorld;
@@ -33,7 +27,8 @@ export default class MainScene extends Scene3D {
   }
 
   init() {
-    this.accessThirdDimension();
+    this.accessThirdDimension({ maxSubSteps: 10, fixedTimeStep: 1 / 120 });
+    this.third.renderer.outputEncoding = THREE.LinearEncoding;
   }
 
   async preload() {
@@ -66,13 +61,13 @@ export default class MainScene extends Scene3D {
 
     ModelTypeFactory.getInstance().addModel("sphere", sphereModel);
 
-    // const sceneModel = new BookModel(this.third, {
-    //   modelName: "/assets/models/book.glb",
-    //   alias: "book",
-    // });
-    // await sceneModel.load();
+    const sceneModel = new BookModel(this.third, {
+      modelName: "book",
+      alias: "book",
+    });
+    await sceneModel.load();
 
-    // ModelTypeFactory.getInstance().addModel("book", sceneModel);
+    ModelTypeFactory.getInstance().addModel("book", sceneModel);
 
     const boxManModel = new PlayerModel(this.third, {
       modelName: "/assets/models/Character.gltf",
@@ -92,31 +87,28 @@ export default class MainScene extends Scene3D {
   }
 
   async createScene() {
-    // await ModelTypeFactory.getInstance().create("book");
-    // const plane = new THREE.Mesh(
-    //   new THREE.PlaneGeometry(10, 20, 10, 10),
-
-    // );
+    await ModelTypeFactory.getInstance().create("book");
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(10, 20, 10, 10));
 
     // const geometry = new THREE.PlaneGeometry(5, 5, 1, 1);
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x1e601c,
-    });
+    // const material = new THREE.MeshStandardMaterial({
+    //   color: 0x1e601c,
+    // });
 
-    const plane = this.third.add.plane(
-      {
-        width: 5000,
-        height: 5000,
-      },
-      material
-    );
+    // const plane = this.third.add.plane(
+    //   {
+    //     width: 5000,
+    //     height: 5000,
+    //   },
+    //   material
+    // );
 
-    plane.castShadow = false;
-    plane.receiveShadow = true;
-    plane.rotation.x = -Math.PI / 2;
+    // plane.castShadow = false;
+    // plane.receiveShadow = true;
+    // plane.rotation.x = -Math.PI / 2;
 
-    this.third.add.existing(plane);
-    this.third.physics.add.existing(plane, { shape: "convexMesh", mass: 0 }); // see https://github.com/enable3d/enable3d/issues/75
+    // this.third.add.existing(plane);
+    // this.third.physics.add.existing(plane, { shape: "convexMesh", mass: 0 }); // see https://github.com/enable3d/enable3d/issues/75
   }
 
   createPlayer() {
@@ -130,60 +122,64 @@ export default class MainScene extends Scene3D {
     });
   }
 
-  createCamera(thirdCameraPosition, position: THREE.Vector3 | undefined) {
-    const cameraPosition = position || new THREE.Vector3();
-    const lookAt =
-      cameraPosition.add(new THREE.Vector3(10, 200, 0)) || new THREE.Vector3();
-    const deltaY = 2;
-    // default camera
-    this.third.camera.position.set(
-      cameraPosition.x,
-      cameraPosition.y + deltaY,
-      cameraPosition.z
-    );
-    const followCam = new THREE.Object3D();
-    // copies the position of the default camera
-    followCam.position.copy(thirdCameraPosition);
-
-    this.third.camera.lookAt(lookAt);
-
-    return followCam;
+  createCamera() {
+    return EntityFactory.getInstance().instantiateProduct("Camera", this.world);
   }
 
-  addPlayerCamera() {
-    const model = ModelFactory.getInstance().getModel(this.playerId);
-    this.camera = this.createCamera(
-      this.third.camera.position,
-      model?.position
-    );
+  // createCamera(thirdCameraPosition, position: THREE.Vector3 | undefined) {
+  //   const cameraPosition = position || new THREE.Vector3();
+  //   const lookAt =
+  //     cameraPosition.add(new THREE.Vector3(10, 200, 0)) || new THREE.Vector3();
+  //   const deltaY = 2;
+  //   // default camera
+  //   this.third.camera.position.set(
+  //     cameraPosition.x,
+  //     cameraPosition.y + deltaY,
+  //     cameraPosition.z
+  //   );
+  //   const followCam = new THREE.Object3D();
+  //   // copies the position of the default camera
+  //   followCam.position.copy(thirdCameraPosition);
 
-    this.camera.position.copy(this.third.camera.position);
-    model?.add(this.camera);
-  }
+  //   this.third.camera.lookAt(lookAt);
 
-  updatePlayerCamera() {
-    const model = ModelFactory.getInstance().getModel(this.playerId);
-    if (this.camera && model) {
-      const rotation = model.getWorldDirection(
-        new THREE.Vector3()?.setFromEuler?.(model.rotation)
-      );
-      const theta = Math.atan2(rotation.x, rotation.z);
+  //   return followCam;
+  // }
 
-      const delta = 5;
+  // addPlayerCamera() {
+  //   const model = ModelFactory.getInstance().getModel(this.playerId);
+  //   this.camera = this.createCamera(
+  //     this.third.camera.position,
+  //     model?.position
+  //   );
 
-      const dx = Math.sin(theta) * delta,
-        dy = -delta * 0.5,
-        dz = Math.cos(theta) * delta;
+  //   this.camera.position.copy(this.third.camera.position);
+  //   model?.add(this.camera);
+  // }
 
-      const px = Position.x[this.playerId];
-      const py = Position.y[this.playerId];
-      const pz = Position.z[this.playerId];
+  // updatePlayerCamera() {
+  //   const model = ModelFactory.getInstance().getModel(this.playerId);
+  //   if (this.camera && model) {
+  //     const rotation = model.getWorldDirection(
+  //       new THREE.Vector3()?.setFromEuler?.(model.rotation)
+  //     );
+  //     const theta = Math.atan2(rotation.x, rotation.z);
 
-      this.third.camera.position.set(px - dx, py - dy, pz - dz);
-      this.third.camera.lookAt(px, py, pz);
-      // this.third.camera.lookAt(posToFollow.x, posToFollow.y + 3, posToFollow.z);
-    }
-  }
+  //     const delta = 5;
+
+  //     const dx = Math.sin(theta) * delta,
+  //       dy = -delta * 0.5,
+  //       dz = Math.cos(theta) * delta;
+
+  //     const px = Position.x[this.playerId];
+  //     const py = Position.y[this.playerId];
+  //     const pz = Position.z[this.playerId];
+
+  //     this.third.camera.position.set(px - dx, py - dy, pz - dz);
+  //     this.third.camera.lookAt(px, py, pz);
+  //     // this.third.camera.lookAt(posToFollow.x, posToFollow.y + 3, posToFollow.z);
+  //   }
+  // }
 
   _LoadSky() {
     const _VS = `
@@ -260,11 +256,11 @@ void main() {
     const { lights } = await this.third.warpSpeed("-ground");
     // const { hemisphereLight, ambientLight, directionalLight } = lights;
 
-    // this.initLight(lights);
+    this.initLight(lights);
     this._LoadSky();
     // enable physics debugging
-    this.third.physics.debug?.enable();
-    this.third.physics.debug?.mode(1);
+    // this.third.physics.debug?.enable();
+    // this.third.physics.debug?.mode(1);
 
     let instance = this;
 
@@ -274,11 +270,13 @@ void main() {
     this.world = createWorld();
     const playerId = instance.createPlayer();
 
+    const cameraId = instance.createCamera();
+
     this.playerId = playerId;
 
-    if (this.usePlayerCamera) {
-      this.addPlayerCamera();
-    }
+    // if (this.usePlayerCamera) {
+    //   this.addPlayerCamera();
+    // }
 
     for (let i = 0; i < 25; ++i) {
       instance.createNPC(10, 10);
@@ -287,12 +285,13 @@ void main() {
     this.systemHandler = SystemHandler.getInstance(this);
   }
 
-  update() {
+  update(time, delta) {
+    console.log(time, delta);
     if (this?.systemHandler?.updateSystems)
-      this.systemHandler.updateSystems(this.world);
+      this.systemHandler.updateSystems(this.world, time);
 
-    if (this.usePlayerCamera) {
-      this.updatePlayerCamera();
-    }
+    // if (this.usePlayerCamera) {
+    //   this.updatePlayerCamera();
+    // }
   }
 }

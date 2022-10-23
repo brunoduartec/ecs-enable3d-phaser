@@ -3,6 +3,7 @@ import { Concretefactory } from "../ConcreteFactory";
 
 import { NPC } from "./NPC";
 import { Player } from "./Player";
+import { Camera } from "./Camera";
 
 class EntityFactory extends Concretefactory {
   private static instance: EntityFactory;
@@ -16,6 +17,7 @@ class EntityFactory extends Concretefactory {
 
     this.addProduct("Player", Player);
     this.addProduct("NPC", NPC);
+    this.addProduct("Camera", Camera);
   }
 
   /**
