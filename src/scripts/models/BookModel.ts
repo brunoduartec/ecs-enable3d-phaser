@@ -1,5 +1,6 @@
 import { ExtendedObject3D } from "@enable3d/phaser-extension";
 import Third from "@enable3d/phaser-extension/dist/third";
+import checkLifeSystem from "../systems/life";
 import { GLModel, GLModelInfo } from "./glModel";
 
 class BookModel extends GLModel {
@@ -9,6 +10,7 @@ class BookModel extends GLModel {
 
   async create(): Promise<ExtendedObject3D> {
     const cloneModel = this.clone();
+    console.log("ENTROU");
 
     cloneModel.scale.set(2, 2, 2);
     cloneModel.castShadow = false;
@@ -20,23 +22,24 @@ class BookModel extends GLModel {
     });
 
     cloneModel.traverse((child) => {
+      console.log(child, child.userData);
       if (child.isMesh) {
         child.castShadow = child.receiveShadow = false;
 
-        // child.material = new Material()
         // child.material.metalness = 0;
         // child.material.roughness = 1;
 
-        if (/mesh/i.test(child.name)) {
-          this.third.physics.add.existing(child, {
-            shape: "concave",
-            mass: 0,
-            collisionFlags: 1,
-            autoCenter: false,
-          });
-          child.body.setAngularFactor(0, 0, 0);
-          child.body.setLinearFactor(0, 0, 0);
-        }
+        // if (/mesh/i.test(child.name)) {
+        this.third.physics.add.existing(child, {
+          shape: "concave",
+          mass: 0,
+          collisionFlags: 1,
+          autoCenter: false,
+        });
+
+        child.body.setAngularFactor(0, 0, 0);
+        child.body.setLinearFactor(0, 0, 0);
+        // }
       }
     });
     return cloneModel;

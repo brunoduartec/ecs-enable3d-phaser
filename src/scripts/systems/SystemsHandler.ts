@@ -2,6 +2,7 @@ import { IWorld } from "bitecs";
 
 import createMovementSystem from "./movement";
 import createModelSystem from "./model";
+import createSensorSystem from "./sensor";
 import createPlayerSystem from "./player";
 import checkLifeSystem from "./life";
 import createNPCSystem from "./npc";
@@ -9,6 +10,7 @@ import chasePlayerSystem from "./chaseplayer";
 import handlePhysicsSystem from "./physics";
 import handleAnimationSystem from "./animation";
 import handleThirdPersonCamera from "./thirdpersoncamera";
+import handleStarSystem from "./star";
 
 class SystemHandler {
   private static instance: SystemHandler;
@@ -39,6 +41,8 @@ class SystemHandler {
     this.systems.push(handlePhysicsSystem(scene));
     this.systems.push(handleAnimationSystem());
     this.systems.push(handleThirdPersonCamera(scene, 0));
+    this.systems.push(createSensorSystem(scene));
+    this.systems.push(handleStarSystem());
   }
 
   /**

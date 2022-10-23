@@ -40,10 +40,11 @@ class PlayerModel extends GLModel {
     });
     // // this.third.add.existing(cloneModel);
     this.third.physics.add.existing(cloneModel, {
-      shape: "sphere",
-      radius: 0.25,
-      width: 0.5,
-      offset: { y: -0.25 },
+      shape: "capsule",
+      radius: 0.5,
+      height: 1,
+      // offset: { y: -0.25 },
+      offset: { y: -1.0 },
     });
     cloneModel.body.setFriction(0.8);
     cloneModel.body.setAngularFactor(0, 0, 0);

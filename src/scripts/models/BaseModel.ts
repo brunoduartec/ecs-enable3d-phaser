@@ -13,17 +13,21 @@ class BaseModel implements IModel {
     this._id = modelInfo.id || 0;
     this.third = third;
   }
+  getName(): string {
+    return this.model.userData.eid || this.model.uuid;
+  }
   setId(id: number) {
     this._id = id;
   }
-  async create(position: THREE.Vector3): Promise<ExtendedObject3D> {
+  async create(position: THREE.Vector3): Promise<any> {
     throw new Error("Method not implemented.");
   }
   load() {
     throw new Error("Method not implemented.");
   }
-  get() {
-    this.model;
+
+  getModel(): ExtendedObject3D {
+    throw new Error("Method not implemented.");
   }
 
   getId(): number {

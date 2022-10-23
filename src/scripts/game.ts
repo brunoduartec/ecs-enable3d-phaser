@@ -1,4 +1,6 @@
 import * as Phaser from "phaser";
+
+import * as Cannon from "cannon-es";
 import { enable3d, Canvas, PhysicsLoader } from "@enable3d/phaser-extension";
 import MainScene from "./scenes/mainScene";
 import PreloadScene from "./scenes/preloadScene";

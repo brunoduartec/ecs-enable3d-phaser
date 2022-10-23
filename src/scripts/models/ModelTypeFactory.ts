@@ -48,6 +48,10 @@ class ModelTypeFactory extends Concretefactory {
     return model?.getId() || 0;
   }
 
+  public getModels() {
+    return this.models;
+  }
+
   public getModelById(id: number): IModel | undefined {
     for (let [key, value] of this.models) {
       if (value.getId() === id) {
@@ -60,7 +64,7 @@ class ModelTypeFactory extends Concretefactory {
   public async createById(
     id: number,
     position: THREE.Vector3
-  ): Promise<ExtendedObject3D | undefined> {
+  ): Promise<any | undefined> {
     const modelTemplate = this.getModelById(id);
     try {
       let model = await modelTemplate?.create(position);
@@ -77,6 +81,7 @@ class ModelTypeFactory extends Concretefactory {
     alias: string,
     position: THREE.Vector3 = new THREE.Vector3()
   ): Promise<ExtendedObject3D | undefined> {
+    console.log("MODEL", alias, position);
     const modelTemplate = this.models?.get(alias);
     try {
       let model = await modelTemplate?.create(position);

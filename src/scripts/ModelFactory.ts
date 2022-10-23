@@ -1,5 +1,6 @@
 import { ExtendedObject3D } from "@enable3d/phaser-extension";
 import { Concretefactory } from "./ConcreteFactory";
+import { IModel } from "./models/IModel";
 
 class ModelFactory extends Concretefactory {
   private static instance: ModelFactory;
@@ -28,7 +29,7 @@ class ModelFactory extends Concretefactory {
     return ModelFactory.instance;
   }
 
-  public addModel(id: number, model: ExtendedObject3D) {
+  public addModel(id: number, model: any) {
     this.models.set(id, model);
   }
 

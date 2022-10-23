@@ -4,6 +4,7 @@ import { Concretefactory } from "../ConcreteFactory";
 import { NPC } from "./NPC";
 import { Player } from "./Player";
 import { Camera } from "./Camera";
+import { Star } from "./Star";
 
 class EntityFactory extends Concretefactory {
   private static instance: EntityFactory;
@@ -17,6 +18,7 @@ class EntityFactory extends Concretefactory {
 
     this.addProduct("Player", Player);
     this.addProduct("NPC", NPC);
+    this.addProduct("Star", Star);
     this.addProduct("Camera", Camera);
   }
 
@@ -39,6 +41,9 @@ class EntityFactory extends Concretefactory {
     const product = new Product();
 
     const id = product.create(world, props);
+
+    console.log(props, id);
+
     return id;
   }
 }

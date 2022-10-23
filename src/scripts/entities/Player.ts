@@ -43,9 +43,10 @@ class Player implements IEntity {
       ModelTypeFactory.getInstance().getModelId("character");
     ModelComponent.width[player] = 1;
     ModelComponent.height[player] = 1;
-    InputComponent.speed[player] = 2;
 
-    JumpComponent.strength[player] = 2;
+    InputComponent.speed[player] = 7;
+
+    JumpComponent.strength[player] = 5;
     JumpComponent.isJumping[player] = 0;
     JumpComponent.isGrounded[player] = 0;
 

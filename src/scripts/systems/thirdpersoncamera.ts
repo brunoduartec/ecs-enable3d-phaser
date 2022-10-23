@@ -11,55 +11,8 @@ const Position = ComponentFactory.getInstance().getProduct("Position");
 const Rotation = ComponentFactory.getInstance().getProduct("Rotation");
 const Player = ComponentFactory.getInstance().getProduct("Rotation");
 
-// export const third_person_camera = (() => {
-//   class ThirdPersonCamera extends entity.Component {
-//     constructor(params) {
-//       super();
-
-//       this._params = params;
-//       this._camera = params.camera;
-
-//       this._currentPosition = new THREE.Vector3();
-//       this._currentLookat = new THREE.Vector3();
-//     }
-
-//     _CalculateIdealOffset() {
-//       const idealOffset = new THREE.Vector3(-0, 10, -15);
-//       idealOffset.applyQuaternion(this._params.target._rotation);
-//       idealOffset.add(this._params.target._position);
-//       return idealOffset;
-//     }
-
-//     _CalculateIdealLookat() {
-//       const idealLookat = new THREE.Vector3(0, 5, 20);
-//       idealLookat.applyQuaternion(this._params.target._rotation);
-//       idealLookat.add(this._params.target._position);
-//       return idealLookat;
-//     }
-
-//     Update(timeElapsed) {
-//       const idealOffset = this._CalculateIdealOffset();
-//       const idealLookat = this._CalculateIdealLookat();
-
-//       // const t = 0.05;
-//       // const t = 4.0 * timeElapsed;
-//       const t = 1.0 - Math.pow(0.01, timeElapsed);
-
-//       this._currentPosition.lerp(idealOffset, t);
-//       this._currentLookat.lerp(idealLookat, t);
-
-//       this._camera.position.copy(this._currentPosition);
-//       this._camera.lookAt(this._currentLookat);
-//     }
-//   }
-
-//   return {
-//     ThirdPersonCamera: ThirdPersonCamera,
-//   };
-// })();
-
 function _CalculateIdealOffset(target) {
-  const idealOffset = new THREE.Vector3(-0, 5, -15);
+  const idealOffset = new THREE.Vector3(10, 10, -15);
   idealOffset.applyQuaternion(target.rotation);
   idealOffset.add(target.position);
   return idealOffset;
@@ -72,9 +25,6 @@ function _CalculateIdealLookat(target) {
   return idealLookat;
 }
 
-let currentPosition = new THREE.Vector3();
-let currentLookat = new THREE.Vector3();
-
 export default function handleThirdPersonCamera(
   scene: Scene3D,
   deltaTime: number
@@ -82,12 +32,14 @@ export default function handleThirdPersonCamera(
   const cameraQuery = defineQuery([ThirdPersonCamera]);
 
   const modelQueryEnter = enterQuery(cameraQuery);
-  const playerQuery = defineQuery([Player]);
+  const playerQuery = defineQuery([Player, Position, Rotation]);
 
   return defineSystem((world) => {
     const newCameras = modelQueryEnter(world);
     const cameras = cameraQuery(world);
     const player = playerQuery(world);
+
+    console.log("PP", player);
 
     const dt = scene.game.loop.delta;
 
@@ -124,10 +76,29 @@ export default function handleThirdPersonCamera(
       // const t = 4.0 * timeElapsed;
       const t = 1.0 - Math.pow(0.01, dt);
 
-      console.log(deltaTime);
+      let currentPosition = new THREE.Vector3(
+        ThirdPersonCamera.posX[id],
+        ThirdPersonCamera.posY[id],
+        ThirdPersonCamera.posZ[id]
+      );
 
       currentPosition.lerp(idealOffset, t);
+
+      ThirdPersonCamera.posX[id] = currentPosition.x;
+      ThirdPersonCamera.posY[id] = currentPosition.y;
+      ThirdPersonCamera.posZ[id] = currentPosition.z;
+
+      let currentLookat = new THREE.Vector3(
+        ThirdPersonCamera.lookatX[id],
+        ThirdPersonCamera.lookatY[id],
+        ThirdPersonCamera.lookatZ[id]
+      );
+
       currentLookat.lerp(idealLookat, t);
+
+      ThirdPersonCamera.lookatX[id] = currentLookat.x;
+      ThirdPersonCamera.lookatY[id] = currentLookat.y;
+      ThirdPersonCamera.lookatZ[id] = currentLookat.z;
 
       scene.third.camera.position.set(
         currentPosition.x,

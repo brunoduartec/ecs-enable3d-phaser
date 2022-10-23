@@ -4,20 +4,16 @@ import { defineSystem, defineQuery, hasComponent, IWorld } from "bitecs";
 
 import { ComponentFactory } from "../components/ComponentFactory";
 
-const Player = ComponentFactory.getInstance().getProduct("Player");
 const Position = ComponentFactory.getInstance().getProduct("Position");
 const Velocity = ComponentFactory.getInstance().getProduct("Velocity");
-const AvoidDrop = ComponentFactory.getInstance().getProduct("AvoidDrop");
 const Model = ComponentFactory.getInstance().getProduct("Model");
 const Rotation = ComponentFactory.getInstance().getProduct("Rotation");
 const Jump = ComponentFactory.getInstance().getProduct("Jump");
-const Health = ComponentFactory.getInstance().getProduct("Health");
-const Clicked = ComponentFactory.getInstance().getProduct("Clicked");
 
 import { ModelFactory } from "../ModelFactory";
 
 export default function handlePhysicsSystem(scene: Scene3D) {
-  const modelQuery = defineQuery([Position, Rotation, Velocity, Health, Model]);
+  const modelQuery = defineQuery([Position, Rotation, Model]);
 
   function getJumpInfo(world: IWorld, id: number) {
     let jumpStrength: number = 0;

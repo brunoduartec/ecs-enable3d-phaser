@@ -12,6 +12,8 @@ import { ModelTypeFactory } from "../models/ModelTypeFactory";
 import { BasicModel } from "../models/BasicModel";
 import { PlayerModel } from "../models/PlayerModel";
 import { BookModel } from "../models/BookModel";
+import { LevelModel } from "../models/LevelModel";
+import { GLModel } from "../models/glModel";
 
 export default class MainScene extends Scene3D {
   private world!: IWorld;
@@ -27,12 +29,16 @@ export default class MainScene extends Scene3D {
   }
 
   init() {
-    this.accessThirdDimension({ maxSubSteps: 10, fixedTimeStep: 1 / 120 });
+    this.accessThirdDimension({
+      maxSubSteps: 10,
+      fixedTimeStep: 1 / 120,
+      gravity: { x: 0, y: -20, z: 0 },
+    });
     this.third.renderer.outputEncoding = THREE.LinearEncoding;
   }
 
   async preload() {
-    await this.third.load.preload("book", "/assets/models/book.glb"); // change 'plataform' for what you want
+    await this.third.load.preload("book", "/assets/models/scene.gltf"); // change 'plataform' for what you want
 
     // await this.third.load.preload("book", "/assets/models/book.glb");
     // await this.initModels();
@@ -48,6 +54,8 @@ export default class MainScene extends Scene3D {
     });
     await boxModel.load();
 
+    this.third.physics;
+
     ModelTypeFactory.getInstance().addModel("box", boxModel);
 
     const sphereModel = new BasicModel(this.third, {
@@ -61,10 +69,14 @@ export default class MainScene extends Scene3D {
 
     ModelTypeFactory.getInstance().addModel("sphere", sphereModel);
 
-    const sceneModel = new BookModel(this.third, {
-      modelName: "book",
-      alias: "book",
-    });
+    const sceneModel = new LevelModel(
+      this.third,
+      {
+        modelName: "book",
+        alias: "book",
+      },
+      this.world
+    );
     await sceneModel.load();
 
     ModelTypeFactory.getInstance().addModel("book", sceneModel);
@@ -84,31 +96,41 @@ export default class MainScene extends Scene3D {
     await EnemyModel.load();
 
     ModelTypeFactory.getInstance().addModel("enemy", EnemyModel);
+
+    const starModel = new GLModel(this.third, {
+      modelName: "/assets/models/Star.gltf",
+      alias: "star",
+    });
+    await starModel.load();
+
+    ModelTypeFactory.getInstance().addModel("star", starModel);
   }
 
-  async createScene() {
-    await ModelTypeFactory.getInstance().create("book");
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(10, 20, 10, 10));
+  async createScene(model: boolean = false) {
+    console.log("Criar a sena");
+    if (model) {
+      await ModelTypeFactory.getInstance().create("book");
+    } else {
+      const geometry = new THREE.PlaneGeometry(5, 5, 1, 1);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x1e601c,
+      });
 
-    // const geometry = new THREE.PlaneGeometry(5, 5, 1, 1);
-    // const material = new THREE.MeshStandardMaterial({
-    //   color: 0x1e601c,
-    // });
+      const plane = this.third.add.plane(
+        {
+          width: 5000,
+          height: 5000,
+        },
+        material
+      );
 
-    // const plane = this.third.add.plane(
-    //   {
-    //     width: 5000,
-    //     height: 5000,
-    //   },
-    //   material
-    // );
+      plane.castShadow = false;
+      plane.receiveShadow = true;
+      plane.rotation.x = -Math.PI / 2;
 
-    // plane.castShadow = false;
-    // plane.receiveShadow = true;
-    // plane.rotation.x = -Math.PI / 2;
-
-    // this.third.add.existing(plane);
-    // this.third.physics.add.existing(plane, { shape: "convexMesh", mass: 0 }); // see https://github.com/enable3d/enable3d/issues/75
+      this.third.add.existing(plane);
+      this.third.physics.add.existing(plane, { shape: "convexMesh", mass: 0 }); // see https://github.com/enable3d/enable3d/issues/75
+    }
   }
 
   createPlayer() {
@@ -256,7 +278,7 @@ void main() {
     const { lights } = await this.third.warpSpeed("-ground");
     // const { hemisphereLight, ambientLight, directionalLight } = lights;
 
-    this.initLight(lights);
+    // this.initLight(lights);
     this._LoadSky();
     // enable physics debugging
     // this.third.physics.debug?.enable();
@@ -264,29 +286,28 @@ void main() {
 
     let instance = this;
 
-    await this.initModels();
-    await this.createScene();
+    console.log("CADEEE");
 
     this.world = createWorld();
+    await this.initModels();
+    await this.createScene(true);
+
     const playerId = instance.createPlayer();
 
-    const cameraId = instance.createCamera();
+    if (this.usePlayerCamera) {
+      const cameraId = instance.createCamera();
+    }
 
     this.playerId = playerId;
 
-    // if (this.usePlayerCamera) {
-    //   this.addPlayerCamera();
+    // for (let i = 0; i < 25; ++i) {
+    //   instance.createNPC(10, 10);
     // }
-
-    for (let i = 0; i < 25; ++i) {
-      instance.createNPC(10, 10);
-    }
 
     this.systemHandler = SystemHandler.getInstance(this);
   }
 
   update(time, delta) {
-    console.log(time, delta);
     if (this?.systemHandler?.updateSystems)
       this.systemHandler.updateSystems(this.world, time);
 

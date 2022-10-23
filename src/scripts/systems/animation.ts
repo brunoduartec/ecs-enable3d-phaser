@@ -9,9 +9,9 @@ import { Action } from "../components/Input";
 import { ModelFactory } from "../ModelFactory";
 
 const animationByAction = {
-  [Action.Up]: "Walk",
-  [Action.Left]: "Walk",
-  [Action.Right]: "Walk",
+  [Action.Up]: "Run",
+  [Action.Left]: "Run",
+  [Action.Right]: "Run",
   [Action.None]: "Idle",
   [Action.Jump]: "Jump",
 };
